@@ -49,7 +49,7 @@ export const IncomingCallModal: React.FC = () => {
           }}
         >
           <ShieldCheck size={14} color="#10B981" />
-          <span>ChatBase End-to-End Encrypted</span>
+          <span>GuruChat End-to-End Encrypted</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>

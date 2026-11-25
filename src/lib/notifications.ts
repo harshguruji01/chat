@@ -11,8 +11,8 @@ export async function initNotificationChannel(): Promise<void> {
   if (Capacitor.isNativePlatform()) {
     try {
       await LocalNotifications.createChannel({
-        id: 'chatbase_messages',
-        name: 'ChatBase Messages',
+        id: 'guruchat_messages',
+        name: 'GuruChat Messages',
         description: 'Instant notifications for incoming chat messages',
         importance: 5, // MAX importance - heads up banner & sound
         visibility: 1, // PUBLIC on lock screen
@@ -80,10 +80,10 @@ export async function showSystemNotification(options: SystemNotificationOptions)
       await LocalNotifications.schedule({
         notifications: [
           {
-            title: title || 'ChatBase',
+            title: title || 'GuruChat',
             body: body || 'New message received',
             id: Math.floor(Math.random() * 1000000) + 1,
-            channelId: 'chatbase_messages',
+            channelId: 'guruchat_messages',
             schedule: { at: new Date(Date.now() + 100) },
             extra: {
               conversationId,
@@ -104,12 +104,12 @@ export async function showSystemNotification(options: SystemNotificationOptions)
         try {
           const options: any = {
             body: body || 'New message received',
-            icon: avatarUrl || '/chatbase.png',
-            badge: '/chatbase.png',
+            icon: avatarUrl || '/guruchat.png',
+            badge: '/guruchat.png',
             tag: conversationId ? `cb_${conversationId}` : undefined,
             renotify: true,
           };
-          const notif = new Notification(title || 'ChatBase', options);
+          const notif = new Notification(title || 'GuruChat', options);
 
           notif.onclick = () => {
             window.focus();
@@ -122,11 +122,11 @@ export async function showSystemNotification(options: SystemNotificationOptions)
             navigator.serviceWorker.ready.then((reg) => {
               const swOptions: any = {
                 body: body || 'New message received',
-                icon: avatarUrl || '/chatbase.png',
-                badge: '/chatbase.png',
+                icon: avatarUrl || '/guruchat.png',
+                badge: '/guruchat.png',
                 tag: conversationId ? `cb_${conversationId}` : undefined,
               };
-              reg.showNotification(title || 'ChatBase', swOptions);
+              reg.showNotification(title || 'GuruChat', swOptions);
             });
           }
         }

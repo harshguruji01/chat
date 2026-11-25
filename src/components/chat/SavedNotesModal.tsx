@@ -19,7 +19,7 @@ interface SavedNotesModalProps {
 export const SavedNotesModal: React.FC<SavedNotesModalProps> = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
   const [notes, setNotes] = useState<NoteItem[]>(() => {
-    const saved = localStorage.getItem('chatbase_saved_notes');
+    const saved = localStorage.getItem('guruchat_saved_notes') || localStorage.getItem('chatbase_saved_notes');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -39,7 +39,7 @@ export const SavedNotesModal: React.FC<SavedNotesModalProps> = ({ isOpen, onClos
   useBackButton(onClose, isOpen, 70);
 
   useEffect(() => {
-    localStorage.setItem('chatbase_saved_notes', JSON.stringify(notes));
+    localStorage.setItem('guruchat_saved_notes', JSON.stringify(notes));
   }, [notes]);
 
   if (!isOpen) return null;

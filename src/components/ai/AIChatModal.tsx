@@ -43,7 +43,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose }) => 
 
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<AIMessage[]>(() => {
-    const saved = localStorage.getItem('chatbase_ai_history');
+    const saved = localStorage.getItem('guruchat_ai_history') || localStorage.getItem('chatbase_ai_history');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -75,7 +75,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose }) => 
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    localStorage.setItem('chatbase_ai_history', JSON.stringify(messages.slice(-20)));
+    localStorage.setItem('guruchat_ai_history', JSON.stringify(messages.slice(-20)));
   }, [messages, isThinking]);
 
   if (!isOpen) return null;
@@ -135,6 +135,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose }) => 
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
+    localStorage.removeItem('guruchat_ai_history');
     localStorage.removeItem('chatbase_ai_history');
     showToast('AI chat history cleared', 'info');
   };
@@ -511,7 +512,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose }) => 
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#fbbf24' }}>
               <Crown size={15} />
-              <span>Daily free AI limit reached (5/5). Upgrade to <strong>ChatBase VIP</strong> for unlimited access!</span>
+              <span>Daily free AI limit reached (5/5). Upgrade to <strong>GuruChat VIP</strong> for unlimited access!</span>
             </div>
             <span
               style={{

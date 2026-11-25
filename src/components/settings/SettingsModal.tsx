@@ -431,7 +431,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {activeTab === 'theme' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Choose your preferred visual aesthetic for ChatBase:
+              Choose your preferred visual aesthetic for GuruChat:
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
@@ -579,7 +579,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                Manage multiple ChatBase accounts on this device (Instagram style):
+                Manage multiple GuruChat accounts on this device (Instagram style):
               </div>
 
               {/* Current Active Account */}
@@ -668,7 +668,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={async () => {
                   await signOut();
                   onClose();
-                  showToast('Enter your other ChatBase User ID or Username to login.', 'info');
+                  showToast('Enter your other GuruChat User ID or Username to login.', 'info');
                 }}
                 style={{ width: '100%' }}
               >

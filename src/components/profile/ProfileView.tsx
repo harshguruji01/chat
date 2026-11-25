@@ -212,7 +212,7 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
 
-        {/* ChatBase VIP Membership Card */}
+        {/* GuruChat VIP Membership Card */}
         <div
           onClick={() => openUpgradeModal()}
           style={{
@@ -250,7 +250,7 @@ export const ProfileView: React.FC = () => {
               </div>
               <div>
                 <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  ChatBase VIP Membership
+                  GuruChat VIP Membership
                 </div>
                 <div style={{ fontSize: '0.78rem', color: isPremium ? '#fbbf24' : 'var(--text-secondary)' }}>
                   {isPremium
@@ -523,7 +523,7 @@ export const ProfileView: React.FC = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Info size={18} color="var(--color-accent)" />
-              <span>About ChatBase</span>
+              <span>About GuruChat</span>
             </div>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Made by HarshGuruJi</span>
           </button>
@@ -560,7 +560,7 @@ export const ProfileView: React.FC = () => {
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Get ChatBase for Android</h4>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Get GuruChat for Android</h4>
                   <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'var(--color-primary)', color: '#fff', borderRadius: '4px', fontWeight: 700 }}>
                     RECOMMENDED
                   </span>
@@ -572,7 +572,7 @@ export const ProfileView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => { window.location.href = 'https://webguruji.online/store-detail.html?slug=chatbase'; }}
+              onClick={() => { window.location.href = 'https://webguruji.online/guruchat'; }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -633,10 +633,10 @@ export const ProfileView: React.FC = () => {
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        title="Delete ChatBase Account?"
+        title="Delete GuruChat Account?"
       >
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '20px' }}>
-          This will permanently remove your profile, conversations, followers, and media from ChatBase. This action cannot be undone.
+          This will permanently remove your profile, conversations, followers, and media from GuruChat. This action cannot be undone.
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
           <OutlinedButton variant="secondary" onClick={() => setIsDeleteModalOpen(false)}>

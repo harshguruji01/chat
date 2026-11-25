@@ -9,5 +9,5 @@ export const AD_CONFIG = {
     nativeAdvanced: '8103452302',
     appOpen: '4220047614',
   },
-  defaultTargetUrl: 'https://webguruji.online/store-detail.html?slug=chatbase',
+  defaultTargetUrl: 'https://webguruji.online/store-detail.html?slug=guruchat',
 };

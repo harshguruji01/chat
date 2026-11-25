@@ -1,4 +1,4 @@
-// GuruJi AI Assistant Engine for ChatBase
+// GuruJi AI Assistant Engine for GuruChat
 // Provides intelligent chat responses, message drafting, translation, and wisdom
 
 export interface AIMessage {
@@ -32,7 +32,7 @@ export const AI_QUICK_PROMPTS = [
     icon: '🚀',
     label: 'Cool Bio Ideas',
     labelHi: 'प्रोफाइल बायो',
-    prompt: 'Suggest 3 attractive and aesthetic short bios for my ChatBase profile.',
+    prompt: 'Suggest 3 attractive and aesthetic short bios for my GuruChat profile.',
   },
   {
     icon: '💡',
@@ -68,11 +68,11 @@ export async function generateAIResponse(
   }
 
   if (q.includes('draft') || q.includes('greeting') || q.includes('मैसेज') || q.includes('hello') || q.includes('hi')) {
-    return `यहाँ आपके लिए 3 आकर्षक मैसेज ड्राफ्ट हैं जिन्हें आप तुरंत कॉपी करके भेज सकते हैं:\n\n1. **Casual & Friendly**:\n> "Hey! Saw your profile on ChatBase, thought I'd say hello. Hope you're having an awesome week! 👋"\n\n2. **Hinglish Warm Vibe**:\n> "नमस्ते! ChatBase पर आपकी प्रोफाइल देखी, लगा कनेक्ट करना चाहिए। सब कैसा चल रहा है? ✨"\n\n3. **Professional & Respectful**:\n> "Hello ${userName}! Glad to connect with you here on ChatBase. Looking forward to good conversations."\n\nआप इनमें से किसी को भी कस्टमाइज़ कर सकते हैं!`;
+    return `यहाँ आपके लिए 3 आकर्षक मैसेज ड्राफ्ट हैं जिन्हें आप तुरंत कॉपी करके भेज सकते हैं:\n\n1. **Casual & Friendly**:\n> "Hey! Saw your profile on GuruChat, thought I'd say hello. Hope you're having an awesome week! 👋"\n\n2. **Hinglish Warm Vibe**:\n> "नमस्ते! GuruChat पर आपकी प्रोफाइल देखी, लगा कनेक्ट करना चाहिए। सब कैसा चल रहा है? ✨"\n\n3. **Professional & Respectful**:\n> "Hello ${userName}! Glad to connect with you here on GuruChat. Looking forward to good conversations."\n\nआप इनमें से किसी को भी कस्टमाइज़ कर सकते हैं!`;
   }
 
   if (q.includes('bio') || q.includes('बायो') || q.includes('profile')) {
-    return `यहाँ आपकी ChatBase प्रोफाइल के लिए बेहतरीन बायो आइडियाज हैं:\n\n1. **Tech & Builder Vibe**:\n> "Creating things that matter. 💻 | Lifelong learner | Always up for great conversations ✨"\n\n2. **Positive & Aesthetic**:\n> "Curious mind & positive energy. 🌿 Let's talk ideas, tech & life."\n\n3. **Hinglish Trendy**:\n> "जिंदगी को सादगी और सपनों को शिद्दत से जीने का शौक। ☕🚀 Connect & chat!"\n\nआप अपनी पसंद अनुसार इमोजी बदलकर इसे अपनी प्रोफाइल में सेट कर सकते हैं!`;
+    return `यहाँ आपकी GuruChat प्रोफाइल के लिए बेहतरीन बायो आइडियाज हैं:\n\n1. **Tech & Builder Vibe**:\n> "Creating things that matter. 💻 | Lifelong learner | Always up for great conversations ✨"\n\n2. **Positive & Aesthetic**:\n> "Curious mind & positive energy. 🌿 Let's talk ideas, tech & life."\n\n3. **Hinglish Trendy**:\n> "जिंदगी को सादगी और सपनों को शिद्दत से जीने का शौक। ☕🚀 Connect & chat!"\n\nआप अपनी पसंद अनुसार इमोजी बदलकर इसे अपनी प्रोफाइल में सेट कर सकते हैं!`;
   }
 
   if (q.includes('icebreaker') || q.includes('बात शुरू') || q.includes('start chat')) {
@@ -88,5 +88,5 @@ export async function generateAIResponse(
   }
 
   // General intelligent response
-  return `नमस्ते ${userName}! 👋 मैं **GuruJi AI** हूँ — ChatBase का स्मार्ट असिस्टेंट।\n\nमैं आपकी कैसे मदद कर सकता हूँ:\n- ✍️ दोस्तों को भेजने के लिए बेहतरीन मैसेज ड्राफ्ट करना\n- 🌐 हिंदी और इंग्लिश में अनुवाद व व्याकरण सुधारना\n- 🌟 दैनिक प्रेरणा और ज्ञानवर्धक विचार साझा करना\n- 💡 प्रोफाइल बायो और चैट आइसब्रेकर्स सुझाना\n\nआप मुझसे कुछ भी पूछ सकते हैं या ऊपर दिए गए क्विक प्रॉम्प्ट्स को टैप कर सकते हैं! ✨`;
+  return `नमस्ते ${userName}! 👋 मैं **GuruJi AI** हूँ — GuruChat का स्मार्ट असिस्टेंट।\n\nमैं आपकी कैसे मदद कर सकता हूँ:\n- ✍️ दोस्तों को भेजने के लिए बेहतरीन मैसेज ड्राफ्ट करना\n- 🌐 हिंदी और इंग्लिश में अनुवाद व व्याकरण सुधारना\n- 🌟 दैनिक प्रेरणा और ज्ञानवर्धक विचार साझा करना\n- 💡 प्रोफाइल बायो और चैट आइसब्रेकर्स सुझाना\n\nआप मुझसे कुछ भी पूछ सकते हैं या ऊपर दिए गए क्विक प्रॉम्प्ट्स को टैप कर सकते हैं! ✨`;
 }

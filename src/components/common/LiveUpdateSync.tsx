@@ -18,11 +18,11 @@ export const LiveUpdateSync: React.FC = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        const storedBuild = localStorage.getItem('chatbase_build_time');
+        const storedBuild = localStorage.getItem('guruchat_build_time') || localStorage.getItem('chatbase_build_time');
         if (storedBuild && Number(storedBuild) < Number(data.buildTime)) {
           setHasUpdate(true);
         } else if (!storedBuild) {
-          localStorage.setItem('chatbase_build_time', String(data.buildTime));
+          localStorage.setItem('guruchat_build_time', String(data.buildTime));
         }
       }
     } catch {
@@ -57,7 +57,7 @@ export const LiveUpdateSync: React.FC = () => {
     fetch(`/version.json?t=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
-        localStorage.setItem('chatbase_build_time', String(data.buildTime));
+        localStorage.setItem('guruchat_build_time', String(data.buildTime));
         window.location.reload();
       })
       .catch(() => {

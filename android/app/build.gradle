@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "online.webguruji.chatbase"
+    namespace = "com.harshguruji.guruchat"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "online.webguruji.chatbase"
+        applicationId "com.harshguruji.guruchat"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -22,7 +22,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('chatbase-release.jks')
+            storeFile file('guruchat-release.jks').exists() ? file('guruchat-release.jks') : file('chatbase-release.jks')
             storePassword 'chatbase123456'
             keyAlias 'chatbase'
             keyPassword 'chatbase123456'

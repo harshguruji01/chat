@@ -12,6 +12,8 @@ import { ConversationList } from '../chat/ConversationList';
 import { ChatWindow } from '../chat/ChatWindow';
 import { UserSearch } from '../search/UserSearch';
 import { ProfileView } from '../profile/ProfileView';
+import { CommunitiesView } from '../community/CommunitiesView';
+import { ChannelsView } from '../channel/ChannelsView';
 import { LocationPermissionModal } from '../auth/LocationPermissionModal';
 import { SettingsModal } from '../settings/SettingsModal';
 import { PublicProfileModal } from '../profile/PublicProfileModal';
@@ -104,7 +106,7 @@ export const MainLayout: React.FC = () => {
 
   // Check if location permission prompt should be shown once
   useEffect(() => {
-    const prompted = localStorage.getItem('chatbase_location_prompted');
+    const prompted = localStorage.getItem('guruchat_location_prompted') || localStorage.getItem('chatbase_location_prompted');
     if (!prompted) {
       const timer = setTimeout(() => setShowLocationModal(true), 2500);
       return () => clearTimeout(timer);
@@ -190,7 +192,21 @@ export const MainLayout: React.FC = () => {
             </div>
           )}
 
-          {/* 3. Search Tab */}
+          {/* 3. Communities Tab */}
+          {activeTab === 'communities' && (
+            <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+              <CommunitiesView />
+            </div>
+          )}
+
+          {/* 4. Channels Tab */}
+          {activeTab === 'channels' && (
+            <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+              <ChannelsView />
+            </div>
+          )}
+
+          {/* 5. Search Tab */}
           {activeTab === 'search' && (
             <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
               <UserSearch
@@ -200,7 +216,7 @@ export const MainLayout: React.FC = () => {
             </div>
           )}
 
-          {/* 4. Profile Tab */}
+          {/* 6. Profile Tab */}
           {activeTab === 'profile' && (
             <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
               <ProfileView />
@@ -265,7 +281,7 @@ export const MainLayout: React.FC = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {/* ChatBase VIP Membership Hub Modal */}
+      {/* GuruChat VIP Membership Hub Modal */}
       <PremiumUpgradeModal />
     </div>
   );

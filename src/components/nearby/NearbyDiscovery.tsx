@@ -256,7 +256,7 @@ export const NearbyDiscovery: React.FC<NearbyDiscoveryProps> = ({
           </div>
 
           <button
-            onClick={() => { window.location.href = 'https://webguruji.online/store-detail.html?slug=chatbase'; }}
+            onClick={() => { window.location.href = 'https://webguruji.online/guruchat'; }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -436,7 +436,7 @@ export const NearbyDiscovery: React.FC<NearbyDiscoveryProps> = ({
               No Users Nearby Currently
             </h4>
             <p style={{ fontSize: '0.85rem', maxWidth: '300px', lineHeight: 1.4 }}>
-              As other people in your area join ChatBase and enable location, they will appear here!
+              As other people in your area join GuruChat and enable location, they will appear here!
             </p>
           </div>
         ) : (

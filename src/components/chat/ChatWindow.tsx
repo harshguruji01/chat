@@ -13,7 +13,7 @@ import { formatRelativeTime } from '../../lib/utils';
 import { supabase } from '../../lib/supabase';
 import { useBackButton } from '../../lib/useBackButton';
 import { GroupDetailsModal } from './GroupDetailsModal';
-import brandLogo from '../../assets/chatbase.png';
+import brandLogo from '../../assets/guruchat.png';
 
 interface ChatWindowProps {
   onBack?: () => void;
@@ -169,8 +169,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack, onViewProfile, i
             }}
           />
           <img
-            src={brandLogo || './chatbase.png'}
-            alt="ChatBase Logo"
+            src={brandLogo || './guruchat.png'}
+            alt="GuruChat Logo"
             style={{
               width: '84px',
               height: '84px',
@@ -192,7 +192,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack, onViewProfile, i
             fontFamily: 'var(--font-brand)',
           }}
         >
-          ChatBase for Web
+          GuruChat Web
         </h2>
 
         <p style={{ fontSize: '0.94rem', maxWidth: '420px', lineHeight: 1.6, marginBottom: '24px' }}>
@@ -725,7 +725,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onBack, onViewProfile, i
         {messages
           .filter((m) => {
             if (!searchKeyword.trim()) return true;
-            return m.content?.toLowerCase().includes(searchKeyword.toLowerCase().trim());
+            const kw = searchKeyword.toLowerCase().trim();
+            return (
+              m.content?.toLowerCase().includes(kw) ||
+              m.file_name?.toLowerCase().includes(kw) ||
+              m.sender?.display_name?.toLowerCase().includes(kw) ||
+              m.sender?.username?.toLowerCase().includes(kw)
+            );
           })
           .map((msg) => (
             <MessageBubble

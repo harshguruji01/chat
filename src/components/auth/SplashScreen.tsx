@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen';
 import { Capacitor } from '@capacitor/core';
-import brandLogo from '../../assets/chatbase.png';
+import brandLogo from '../../assets/guruchat.png';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -54,8 +54,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       >
         <div className="logo-glow-anim">
           <img
-            src={brandLogo || './chatbase.png'}
-            alt="ChatBase"
+            src={brandLogo || './guruchat.png'}
+            alt="GuruChat"
             style={{ width: '108px', height: '108px', borderRadius: '24px', objectFit: 'contain' }}
           />
         </div>
@@ -73,16 +73,17 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
               marginBottom: '6px',
             }}
           >
-            ChatBase
+            GuruChat
           </h1>
           <p
             style={{
               fontSize: '0.95rem',
               color: 'var(--text-secondary)',
               fontWeight: 500,
+              letterSpacing: '0.5px',
             }}
           >
-            Connect, Discover & Chat Instantly
+            Connect. Chat. Share.
           </p>
         </div>
 

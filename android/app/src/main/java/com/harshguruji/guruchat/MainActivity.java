@@ -1,4 +1,4 @@
-package online.webguruji.chatbase;
+package com.harshguruji.guruchat;
 
 import com.getcapacitor.BridgeActivity;
 

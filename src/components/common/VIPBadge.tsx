@@ -37,7 +37,7 @@ export const VIPBadge: React.FC<VIPBadgeProps> = ({
     return (
       <span
         onClick={clickable ? handleClick : undefined}
-        title="Upgrade to ChatBase VIP"
+        title="Upgrade to GuruChat VIP"
         className={`vip-badge-free ${className}`}
         style={{
           display: 'inline-flex',
@@ -67,7 +67,7 @@ export const VIPBadge: React.FC<VIPBadgeProps> = ({
   return (
     <span
       onClick={clickable ? handleClick : undefined}
-      title="ChatBase VIP Member 👑"
+      title="GuruChat VIP Member 👑"
       className={`vip-badge-active ${className}`}
       style={{
         display: 'inline-flex',

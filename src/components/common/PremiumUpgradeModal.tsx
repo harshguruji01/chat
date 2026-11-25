@@ -179,7 +179,7 @@ export const PremiumUpgradeModal: React.FC = () => {
               letterSpacing: '-0.02em',
             }}
           >
-            {isPremium ? 'ChatBase VIP Active 👑' : 'Upgrade to ChatBase VIP'}
+            {isPremium ? 'GuruChat VIP Active 👑' : 'Upgrade to GuruChat VIP'}
           </h2>
 
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>

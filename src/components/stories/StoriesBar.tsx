@@ -15,7 +15,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({ onReplyToStory }) => {
   const { profile } = useAuth();
 
   const [stories, setStories] = useState<Story[]>(() => {
-    const saved = localStorage.getItem('chatbase_stories');
+    const saved = localStorage.getItem('guruchat_stories') || localStorage.getItem('chatbase_stories');
     if (saved) {
       try {
         const parsed: Story[] = JSON.parse(saved);
@@ -32,7 +32,7 @@ export const StoriesBar: React.FC<StoriesBarProps> = ({ onReplyToStory }) => {
   const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('chatbase_stories', JSON.stringify(stories));
+    localStorage.setItem('guruchat_stories', JSON.stringify(stories));
   }, [stories]);
 
   const handleOpenViewer = (index: number) => {

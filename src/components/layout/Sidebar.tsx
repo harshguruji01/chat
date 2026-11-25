@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import {
   Home,
   MessageSquare,
+  Users,
+  Radio,
   Search,
   User,
   Moon,
@@ -194,7 +196,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>{t('chats')}</span>
         </button>
 
-        {/* 3. Search & Nearby */}
+        {/* 3. Communities */}
+        <button
+          className={`desktop-nav-btn ${activeTab === 'communities' ? 'active' : ''}`}
+          onClick={() => {
+            soundEffects.play('click');
+            onSelectTab('communities');
+          }}
+        >
+          <Users size={19} />
+          <span>Communities</span>
+        </button>
+
+        {/* 4. Channels */}
+        <button
+          className={`desktop-nav-btn ${activeTab === 'channels' ? 'active' : ''}`}
+          onClick={() => {
+            soundEffects.play('click');
+            onSelectTab('channels');
+          }}
+        >
+          <Radio size={19} />
+          <span>Channels</span>
+        </button>
+
+        {/* 5. Search & Nearby */}
         <button
           className={`desktop-nav-btn ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => {
@@ -206,7 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>{t('search')}</span>
         </button>
 
-        {/* 4. Profile */}
+        {/* 6. Profile */}
         <button
           className={`desktop-nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => {
@@ -266,7 +292,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         )}
 
-        {/* 7. ChatBase VIP Membership */}
+        {/* 7. GuruChat VIP Membership */}
         <button
           className="desktop-nav-btn"
           onClick={() => {
@@ -281,11 +307,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             color: '#fbbf24',
             marginTop: '4px',
           }}
-          title={isPremium ? 'ChatBase VIP Active' : 'Upgrade to ChatBase VIP'}
+          title={isPremium ? 'GuruChat VIP Active' : 'Upgrade to GuruChat VIP'}
         >
           <Crown size={19} color="#f59e0b" />
           <span style={{ fontWeight: 700, color: '#f59e0b' }}>
-            {isPremium ? 'VIP Member 👑' : 'ChatBase VIP ✨'}
+            {isPremium ? 'VIP Member 👑' : 'GuruChat VIP ✨'}
           </span>
           <span
             style={{

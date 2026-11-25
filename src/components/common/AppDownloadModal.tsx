@@ -14,7 +14,7 @@ export const AppDownloadModal: React.FC<AppDownloadModalProps> = ({
   onClose,
   feature = 'general',
 }) => {
-  const storeUrl = 'https://webguruji.online/store-detail.html?slug=chatbase';
+  const storeUrl = 'https://webguruji.online/guruchat';
 
   const handleDownload = () => {
     window.location.href = storeUrl;
@@ -26,7 +26,7 @@ export const AppDownloadModal: React.FC<AppDownloadModalProps> = ({
         return {
           badge: '🎙️ Voice Notes Exclusive',
           title: 'HD Voice Notes are Android App Exclusive',
-          desc: 'To ensure crystal-clear studio audio, live interactive waveforms, and background playback, voice recording is engineered exclusively for the ChatBase Android App.',
+          desc: 'To ensure crystal-clear studio audio, live interactive waveforms, and background playback, voice recording is engineered exclusively for the GuruChat Android App.',
         };
       case 'radar':
         return {
@@ -37,7 +37,7 @@ export const AppDownloadModal: React.FC<AppDownloadModalProps> = ({
       default:
         return {
           badge: '✨ Get the Native Experience',
-          title: 'Unlock Full Power with ChatBase Android',
+          title: 'Unlock Full Power with GuruChat Android',
           desc: 'The web version provides essential messaging, but the Android APK unlocks our most powerful, hardware-accelerated communication features.',
         };
     }
@@ -46,7 +46,7 @@ export const AppDownloadModal: React.FC<AppDownloadModalProps> = ({
   const info = getFeatureHeadline();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="ChatBase for Android">
+    <Modal isOpen={isOpen} onClose={onClose} title="GuruChat for Android">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
         {/* Top Promotional Header */}
         <div
@@ -197,7 +197,7 @@ export const AppDownloadModal: React.FC<AppDownloadModalProps> = ({
             onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
             <Download size={20} />
-            <span>Download ChatBase App (Official)</span>
+            <span>Download GuruChat App (Official)</span>
           </button>
 
           <a

@@ -19,7 +19,7 @@ const SPONSORED_OFFERS = [
     icon: Sparkles,
   },
   {
-    title: 'ChatBase Android APK - Instant Connect',
+    title: 'GuruChat Android APK - Instant Connect',
     tagline: 'Unlock HD Voice Notes, Live GPS Radar, and 120Hz Fast Messaging!',
     cta: 'Install Official APK',
     rating: '5.0 ★',

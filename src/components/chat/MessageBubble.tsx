@@ -11,6 +11,11 @@ import {
   Heart,
   Smile,
   Reply,
+  Edit2,
+  Forward,
+  FileText,
+  Download,
+  ExternalLink,
 } from 'lucide-react';
 import type { Message } from '../../types';
 import {
@@ -24,6 +29,8 @@ import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { Avatar } from '../common/Avatar';
 import { ImageLightboxModal } from './ImageLightboxModal';
+import { EditMessageModal } from './EditMessageModal';
+import { ForwardMessageModal } from './ForwardMessageModal';
 
 interface MessageBubbleProps {
   message: Message;
@@ -56,6 +63,22 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [showHeartBurst, setShowHeartBurst] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showForwardModal, setShowForwardModal] = useState(false);
+
+  const detectedUrl = useMemo(() => {
+    if (!message.content || message.type !== 'text') return null;
+    const match = message.content.match(/https?:\/\/[^\s]+/i);
+    return match ? match[0] : null;
+  }, [message.content, message.type]);
+
+  const safeDomain = (url: string) => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return 'link';
+    }
+  };
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const daysRemaining = getDaysRemaining(message.expires_at);
@@ -520,11 +543,108 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 </div>
               )}
 
+              {/* Document Attachment */}
+              {message.type === 'document' && message.media_url && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '10px 14px',
+                    background: isOutgoing ? 'rgba(255, 255, 255, 0.15)' : 'var(--bg-card)',
+                    borderRadius: '12px',
+                    minWidth: '220px',
+                    maxWidth: '300px',
+                    margin: '4px 0',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '10px',
+                      background: isOutgoing ? 'rgba(255, 255, 255, 0.25)' : 'var(--color-primary-light)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <FileText size={20} color={isOutgoing ? '#fff' : 'var(--color-primary)'} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span
+                      style={{
+                        display: 'block',
+                        fontSize: '0.88rem',
+                        fontWeight: 600,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: isOutgoing ? '#fff' : 'var(--text-primary)',
+                      }}
+                      title={message.file_name || 'Document'}
+                    >
+                      {message.file_name || 'Document'}
+                    </span>
+                    {message.media_size_bytes && (
+                      <span style={{ fontSize: '0.72rem', opacity: 0.75, color: isOutgoing ? '#fff' : 'var(--text-muted)' }}>
+                        {(message.media_size_bytes / (1024 * 1024)).toFixed(1)} MB
+                      </span>
+                    )}
+                  </div>
+                  <a
+                    href={message.media_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download={message.file_name || 'download'}
+                    style={{
+                      color: isOutgoing ? '#fff' : 'var(--color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '6px',
+                      borderRadius: '50%',
+                      background: isOutgoing ? 'rgba(255, 255, 255, 0.15)' : 'var(--bg-input)',
+                    }}
+                    title="Download document"
+                  >
+                    <Download size={16} />
+                  </a>
+                </div>
+              )}
+
               {/* Normal Text / Emoji Message with Inline Rich Formatting */}
-              {message.content && message.type !== 'voice' && message.type !== 'image' && message.type !== 'like' && (
-                <p style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, lineHeight: 1.45 }}>
-                  {renderFormattedText(message.content)}
-                </p>
+              {message.content && message.type !== 'voice' && message.type !== 'image' && message.type !== 'like' && message.type !== 'document' && (
+                <div>
+                  <p style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, lineHeight: 1.45 }}>
+                    {renderFormattedText(message.content)}
+                  </p>
+                  {detectedUrl && (
+                    <a
+                      href={detectedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        marginTop: '6px',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        background: 'rgba(0, 0, 0, 0.2)',
+                        color: isOutgoing ? '#E0F2FE' : 'var(--color-primary)',
+                        fontSize: '0.75rem',
+                        textDecoration: 'none',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      <ExternalLink size={12} />
+                      <span style={{ fontWeight: 600 }}>{safeDomain(detectedUrl)}</span>
+                    </a>
+                  )}
+                </div>
               )}
             </>
           )}
@@ -661,6 +781,58 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 </button>
               )}
 
+              {/* Edit message (sender only) */}
+              {isOutgoing && message.type === 'text' && (
+                <button
+                  onClick={() => {
+                    setShowEditModal(true);
+                    setShowMenu(false);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.85rem',
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => ((e.target as HTMLElement).style.background = 'var(--bg-card-hover)')}
+                  onMouseLeave={(e) => ((e.target as HTMLElement).style.background = 'transparent')}
+                >
+                  <Edit2 size={14} /> Edit message
+                </button>
+              )}
+
+              {/* Forward message */}
+              <button
+                onClick={() => {
+                  setShowForwardModal(true);
+                  setShowMenu(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 10px',
+                  fontSize: '0.85rem',
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  borderRadius: '6px',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => ((e.target as HTMLElement).style.background = 'var(--bg-card-hover)')}
+                onMouseLeave={(e) => ((e.target as HTMLElement).style.background = 'transparent')}
+              >
+                <Forward size={14} /> Forward
+              </button>
+
               <button
                 onClick={() => {
                   onDeleteMessage(message.id, false);
@@ -724,6 +896,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
         <span>{formatMessageTime(message.created_at)}</span>
 
+        {message.is_edited && (
+          <span style={{ fontSize: '0.68rem', opacity: 0.75, fontStyle: 'italic', marginLeft: '4px' }}>
+            (edited)
+          </span>
+        )}
+
         {isOutgoing && (
           <span style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '3px' }}>
             {message.status === 'sending' && (
@@ -762,6 +940,24 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           senderName={message.sender?.display_name}
           timestamp={formatMessageTime(message.created_at)}
           onClose={() => setShowLightbox(false)}
+        />
+      )}
+
+      {/* Edit Message Modal */}
+      {showEditModal && (
+        <EditMessageModal
+          isOpen={showEditModal}
+          message={message}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
+
+      {/* Forward Message Modal */}
+      {showForwardModal && (
+        <ForwardMessageModal
+          isOpen={showForwardModal}
+          message={message}
+          onClose={() => setShowForwardModal(false)}
         />
       )}
     </div>

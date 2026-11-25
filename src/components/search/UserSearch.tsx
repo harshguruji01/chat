@@ -352,7 +352,7 @@ export const UserSearch: React.FC<UserSearchProps> = ({ onStartChat, onViewProfi
               <Search size={28} />
             </div>
             <h4 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-              Type to Search ChatBase
+              Type to Search GuruChat
             </h4>
             <p style={{ fontSize: '0.85rem', maxWidth: '300px', lineHeight: 1.4 }}>
               Enter any friend's username or unique 8-character ID to instantly discover and connect with them.

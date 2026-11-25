@@ -83,7 +83,9 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     try {
-      const saved = localStorage.getItem('chatbase_language');
+      const saved =
+        localStorage.getItem('guruchat_language') ||
+        localStorage.getItem('chatbase_language');
       return saved === 'hi' ? 'hi' : 'en';
     } catch {
       return 'en';
@@ -93,7 +95,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     try {
-      localStorage.setItem('chatbase_language', lang);
+      localStorage.setItem('guruchat_language', lang);
     } catch (e) {
       console.warn('Failed to save language', e);
     }

@@ -42,7 +42,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `chatbase-photo-${Date.now()}.jpg`;
+      a.download = `guruchat-photo-${Date.now()}.jpg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

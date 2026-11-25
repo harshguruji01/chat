@@ -1024,7 +1024,7 @@
   opacity: 0.15;
 }
 
-/* ChatBase VIP Gold Effects */
+/* GuruChat VIP Gold Effects */
 .vip-badge-active {
   animation: vipShimmer 3s ease-in-out infinite alternate;
 }

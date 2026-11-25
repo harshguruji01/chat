@@ -43,13 +43,13 @@ class BackNavigationManager {
         const handled = this.handleBack();
         if (handled) {
           // Push a dummy state back so next back press also triggers popstate
-          window.history.pushState({ chatbaseBack: true }, '');
+          window.history.pushState({ guruchatBack: true }, '');
         }
       });
 
       // Seed initial history state
       try {
-        window.history.pushState({ chatbaseBack: true }, '');
+        window.history.pushState({ guruchatBack: true }, '');
       } catch {
         // ignore
       }

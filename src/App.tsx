@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './components/common/Toast';
 import { LanguageProvider } from './context/LanguageContext';
@@ -14,11 +14,51 @@ import { LiveUpdateSync } from './components/common/LiveUpdateSync';
 import { IncomingCallModal } from './components/call/IncomingCallModal';
 import { ActiveCallModal } from './components/call/ActiveCallModal';
 import { FloatingCallBubble } from './components/call/FloatingCallBubble';
+import { AdminControlCenter } from './components/admin/AdminControlCenter';
 
-const ChatBaseApp: React.FC = () => {
+const GuruChatApp: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
+  const [isAdminView, setIsAdminView] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.location.pathname.startsWith('/admin') ||
+      window.location.hash.startsWith('#/admin')
+    );
+  });
+
+  // Watch URL hash or popstate for /admin route
+  useEffect(() => {
+    const checkRoute = () => {
+      const isRoute =
+        window.location.pathname.startsWith('/admin') ||
+        window.location.hash.startsWith('#/admin');
+      setIsAdminView(isRoute);
+    };
+
+    window.addEventListener('popstate', checkRoute);
+    window.addEventListener('hashchange', checkRoute);
+    return () => {
+      window.removeEventListener('popstate', checkRoute);
+      window.removeEventListener('hashchange', checkRoute);
+    };
+  }, []);
+
+  // Dedicated Route: guruchat.webguruji.online/admin
+  if (isAdminView) {
+    return (
+      <AdminControlCenter
+        onExit={() => {
+          setIsAdminView(false);
+          try {
+            window.history.pushState(null, '', '/');
+            window.location.hash = '';
+          } catch {}
+        }}
+      />
+    );
+  }
 
   // While splash screen is animating, keep it on
   if (showSplash) {
@@ -39,7 +79,7 @@ const ChatBaseApp: React.FC = () => {
     );
   }
 
-  // Main Application (Chat, Nearby, Search, Profile)
+  // Main Application (Chat, Communities, Channels, Nearby, Search, Profile)
   return (
     <>
       <MainLayout />
@@ -60,7 +100,7 @@ export default function App() {
               <ChatProvider>
                 <CallProvider>
                   <LiveUpdateSync />
-                  <ChatBaseApp />
+                  <GuruChatApp />
                 </CallProvider>
               </ChatProvider>
             </PremiumProvider>

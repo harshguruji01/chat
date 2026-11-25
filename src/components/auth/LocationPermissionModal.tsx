@@ -25,11 +25,11 @@ export const LocationPermissionModal: React.FC<LocationPermissionModalProps> = (
       const pos = await getCurrentPosition();
       await updateLocation(pos.latitude, pos.longitude);
       showToast('Location permission granted! Nearby people enabled.', 'success');
-      localStorage.setItem('chatbase_location_prompted', 'true');
+      localStorage.setItem('guruchat_location_prompted', 'true');
       onClose();
     } catch (err: any) {
       showToast(err.message || 'Location access denied. App will continue working.', 'info');
-      localStorage.setItem('chatbase_location_prompted', 'true');
+      localStorage.setItem('guruchat_location_prompted', 'true');
       onClose();
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ export const LocationPermissionModal: React.FC<LocationPermissionModalProps> = (
             Allow Location Access
           </h4>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.5 }}>
-            Allow ChatBase to access your location to help you discover people nearby and connect with users in your area.
+            Allow GuruChat to access your location to help you discover people nearby and connect with users in your area.
           </p>
         </div>
 

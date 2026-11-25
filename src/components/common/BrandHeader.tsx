@@ -1,5 +1,5 @@
 import React from 'react';
-import brandLogo from '../../assets/chatbase.png';
+import brandLogo from '../../assets/guruchat.png';
 
 interface BrandHeaderProps {
   size?: 'sm' | 'md' | 'lg';
@@ -23,8 +23,8 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ size = 'md', showSubti
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <img
-          src={brandLogo || './chatbase.png'}
-          alt="GuruChats Logo"
+          src={brandLogo || './guruchat.png'}
+          alt="GuruChat Logo"
           style={{ width: logoSizes[size], height: logoSizes[size], borderRadius: size === 'lg' ? '16px' : '10px', objectFit: 'contain' }}
         />
         <span
@@ -38,7 +38,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ size = 'md', showSubti
             letterSpacing: '-0.5px',
           }}
         >
-          GuruChats
+          GuruChat
         </span>
       </div>
 

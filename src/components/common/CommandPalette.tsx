@@ -126,7 +126,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     },
     {
       id: 'open_vip_hub',
-      title: isPremium ? 'ChatBase VIP Membership Hub 👑' : 'Upgrade to ChatBase VIP ✨',
+      title: isPremium ? 'GuruChat VIP Membership Hub 👑' : 'Upgrade to GuruChat VIP ✨',
       subtitle: isPremium ? `Active plan: ${premiumPlan.toUpperCase()} (Ad-free, Unlimited AI)` : 'Unlock Ad-free, Unlimited AI, Ghost Radar, and Exclusive Themes',
       icon: <Crown size={18} color="#F59E0B" />,
       category: 'Tools',
@@ -386,7 +386,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             <span>↵ Select</span>
             <span>ESC Close</span>
           </div>
-          <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>ChatBase Command Center</span>
+          <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>GuruChat Command Center</span>
         </div>
       </div>
     </div>

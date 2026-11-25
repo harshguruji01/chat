@@ -12,7 +12,11 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
-    return (localStorage.getItem('chatbase_theme') as ThemeMode) || 'dark';
+    return (
+      (localStorage.getItem('guruchat_theme') as ThemeMode) ||
+      (localStorage.getItem('chatbase_theme') as ThemeMode) ||
+      'dark'
+    );
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('dark');
@@ -30,7 +34,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setResolvedTheme(actualTheme);
     root.setAttribute('data-theme', actualTheme);
-    localStorage.setItem('chatbase_theme', theme);
+    localStorage.setItem('guruchat_theme', theme);
   }, [theme]);
 
   const setTheme = (newTheme: ThemeMode) => {

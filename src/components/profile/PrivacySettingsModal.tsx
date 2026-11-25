@@ -120,7 +120,7 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
               <div>
                 <span style={{ fontWeight: 600, fontSize: '0.92rem' }}>Show Online Status</span>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
-                  Show a green dot and active timestamp when you are using ChatBase.
+                  Show a green dot and active timestamp when you are using GuruChat.
                 </p>
               </div>
             </div>

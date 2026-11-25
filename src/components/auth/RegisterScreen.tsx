@@ -6,7 +6,7 @@ import { OutlinedButton } from '../common/OutlinedButton';
 import { BrandHeader } from '../common/BrandHeader';
 import { useToast } from '../common/Toast';
 import { compressImage } from '../../lib/compression';
-import brandLogo from '../../assets/chatbase.png';
+import brandLogo from '../../assets/guruchat.png';
 
 interface RegisterScreenProps {
   onGoToLogin: () => void;
@@ -114,7 +114,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
     if (error) {
       showToast(error, 'error');
     } else {
-      showToast('Account created successfully! Welcome to ChatBase.', 'success');
+      showToast('Account created successfully! Welcome to GuruChat.', 'success');
     }
   };
 
@@ -162,8 +162,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
               <img
-                src={brandLogo || './chatbase.png'}
-                alt="ChatBase Logo"
+                src={brandLogo || './guruchat.png'}
+                alt="GuruChat Logo"
                 style={{
                   width: '52px',
                   height: '52px',
@@ -195,7 +195,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--color-primary)' }}>✓</span>
-                <span>Automatic 8-digit permanent ChatBase ID</span>
+                <span>Automatic 8-digit permanent GuruChat ID</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem' }}>
                 <span style={{ color: 'var(--color-primary)' }}>✓</span>
@@ -237,7 +237,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
           <div style={{ marginBottom: '16px' }}>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>Create Your Account</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.84rem', marginTop: '2px' }}>
-              Enter your details to generate your unique ChatBase ID
+              Enter your details to generate your unique GuruChat ID
             </p>
           </div>
 
@@ -414,7 +414,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
             style={{ width: '100%' }}
             icon={<ArrowRight size={18} />}
           >
-            Create ChatBase Account
+            Create GuruChat Account
           </OutlinedButton>
         </form>
 

@@ -134,4 +134,46 @@ export interface AdminAuditLog {
   admin?: Profile;
 }
 
-export type TabType = 'home' | 'chat' | 'search' | 'profile';
+export interface Community {
+  id: string;
+  name: string;
+  description: string;
+  avatar_url?: string | null;
+  banner_url?: string | null;
+  creator_id: string;
+  is_private: boolean;
+  member_count: number;
+  groups_count: number;
+  created_at: string;
+  groups?: { id: string; name: string; member_count: number }[];
+  is_joined?: boolean;
+}
+
+export interface Channel {
+  id: string;
+  title: string;
+  handle: string;
+  description: string;
+  avatar_url?: string | null;
+  banner_url?: string | null;
+  subscribers_count: number;
+  is_verified: boolean;
+  creator_name: string;
+  created_at: string;
+  is_subscribed?: boolean;
+  pinned_announcement?: string;
+  posts?: ChannelPost[];
+}
+
+export interface ChannelPost {
+  id: string;
+  channel_id: string;
+  title?: string;
+  content: string;
+  media_url?: string | null;
+  views_count: number;
+  likes_count: number;
+  created_at: string;
+}
+
+export type TabType = 'home' | 'chat' | 'communities' | 'channels' | 'search' | 'profile';

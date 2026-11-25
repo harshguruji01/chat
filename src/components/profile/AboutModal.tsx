@@ -11,16 +11,16 @@ interface AboutModalProps {
 
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="About ChatBase">
+    <Modal isOpen={isOpen} onClose={onClose} title="About GuruChat">
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px' }}>
         <BrandHeader size="lg" showSubtitle={false} />
 
         <div>
           <h4 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '4px' }}>
-            ChatBase v1.0.0
+            GuruChat v2.0
           </h4>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
-            Production-grade social chat platform engineered for seamless connection.
+            Connect. Chat. Share. — Production-grade messaging platform by HarshGuruJi.
           </p>
         </div>
 

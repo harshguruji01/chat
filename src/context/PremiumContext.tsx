@@ -92,7 +92,9 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Premium status state (hydrated from localStorage and synced with profile)
   const [isPremium, setIsPremium] = useState<boolean>(() => {
     try {
-      const local = localStorage.getItem('chatbase_is_premium');
+      const local =
+        localStorage.getItem('guruchat_is_premium') ||
+        localStorage.getItem('chatbase_is_premium');
       return local === 'true';
     } catch {
       return false;
@@ -101,7 +103,11 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [premiumPlan, setPremiumPlan] = useState<PremiumPlan>(() => {
     try {
-      return (localStorage.getItem('chatbase_premium_plan') as PremiumPlan) || 'free';
+      return (
+        (localStorage.getItem('guruchat_premium_plan') as PremiumPlan) ||
+        (localStorage.getItem('chatbase_premium_plan') as PremiumPlan) ||
+        'free'
+      );
     } catch {
       return 'free';
     }
@@ -109,7 +115,10 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [premiumUntil, setPremiumUntil] = useState<string | null>(() => {
     try {
-      return localStorage.getItem('chatbase_premium_until');
+      return (
+        localStorage.getItem('guruchat_premium_until') ||
+        localStorage.getItem('chatbase_premium_until')
+      );
     } catch {
       return null;
     }
@@ -118,7 +127,10 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Incognito Radar state
   const [incognitoRadar, setIncognitoRadarState] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('chatbase_incognito_radar') === 'true';
+      const local =
+        localStorage.getItem('guruchat_incognito_radar') ||
+        localStorage.getItem('chatbase_incognito_radar');
+      return local === 'true';
     } catch {
       return false;
     }
@@ -127,7 +139,11 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Chat Wallpaper state
   const [chatWallpaper, setChatWallpaperState] = useState<string>(() => {
     try {
-      return localStorage.getItem('chatbase_chat_wallpaper') || 'default';
+      return (
+        localStorage.getItem('guruchat_chat_wallpaper') ||
+        localStorage.getItem('chatbase_chat_wallpaper') ||
+        'default'
+      );
     } catch {
       return 'default';
     }
@@ -140,12 +156,14 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Daily AI Usage tracking
   const getTodayKey = () => {
     const d = new Date();
-    return `chatbase_ai_usage_${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`;
+    return `guruchat_ai_usage_${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`;
   };
 
   const [aiUsageToday, setAiUsageToday] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem(getTodayKey());
+      const d = new Date();
+      const legacyKey = `chatbase_ai_usage_${d.getFullYear()}_${d.getMonth() + 1}_${d.getDate()}`;
+      const saved = localStorage.getItem(getTodayKey()) || localStorage.getItem(legacyKey);
       return saved ? parseInt(saved, 10) : 0;
     } catch {
       return 0;
@@ -159,12 +177,12 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setIsPremium(true);
         setPremiumPlan(profile.premium_plan || 'monthly');
         setPremiumUntil(profile.premium_until || null);
-        localStorage.setItem('chatbase_is_premium', 'true');
+        localStorage.setItem('guruchat_is_premium', 'true');
         if (profile.premium_plan) {
-          localStorage.setItem('chatbase_premium_plan', profile.premium_plan);
+          localStorage.setItem('guruchat_premium_plan', profile.premium_plan);
         }
         if (profile.premium_until) {
-          localStorage.setItem('chatbase_premium_until', profile.premium_until);
+          localStorage.setItem('guruchat_premium_until', profile.premium_until);
         }
       }
     }
@@ -184,11 +202,11 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const setIncognitoRadar = useCallback((val: boolean) => {
     if (val && !isPremium) {
       openUpgradeModal('radar');
-      showToast('Ghost Incognito Radar requires ChatBase VIP 👑', 'info');
+      showToast('Ghost Incognito Radar requires GuruChat VIP 👑', 'info');
       return;
     }
     setIncognitoRadarState(val);
-    localStorage.setItem('chatbase_incognito_radar', String(val));
+    localStorage.setItem('guruchat_incognito_radar', String(val));
     showToast(val ? '👻 Ghost Incognito Radar Enabled' : 'Radar set to standard visibility', 'info');
   }, [isPremium, openUpgradeModal, showToast]);
 
@@ -197,11 +215,11 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const wp = CHAT_WALLPAPERS.find((w) => w.id === wallpaperId);
     if (wp?.isVipOnly && !isPremium) {
       openUpgradeModal('wallpaper');
-      showToast('Exclusive Chat Themes require ChatBase VIP 👑', 'info');
+      showToast('Exclusive Chat Themes require GuruChat VIP 👑', 'info');
       return;
     }
     setChatWallpaperState(wallpaperId);
-    localStorage.setItem('chatbase_chat_wallpaper', wallpaperId);
+    localStorage.setItem('guruchat_chat_wallpaper', wallpaperId);
     showToast(`Wallpaper changed to ${wp?.name || wallpaperId}`, 'success');
   }, [isPremium, openUpgradeModal, showToast]);
 
@@ -242,6 +260,9 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const expiryStr = expiry.toISOString();
     setPremiumUntil(expiryStr);
 
+    localStorage.setItem('guruchat_is_premium', 'true');
+    localStorage.setItem('guruchat_premium_plan', plan);
+    localStorage.setItem('guruchat_premium_until', expiryStr);
     localStorage.setItem('chatbase_is_premium', 'true');
     localStorage.setItem('chatbase_premium_plan', plan);
     localStorage.setItem('chatbase_premium_until', expiryStr);
@@ -268,20 +289,20 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
     } catch {}
 
-    showToast(`👑 Welcome to ChatBase VIP! You are now subscribed to ${plan.toUpperCase()}!`, 'success');
+    showToast(`👑 Welcome to GuruChat VIP! You are now subscribed to ${plan.toUpperCase()}!`, 'success');
   }, [closeUpgradeModal, showToast, updateProfile]);
 
   // Promo code redemption
   const redeemPromoCode = useCallback((code: string): { success: boolean; message: string } => {
     const clean = code.trim().toUpperCase();
-    const VALID_CODES = ['CHATBASEVIP', 'GOLD2026', 'PREMIUM', 'HARSHVIP', 'FREEVIP', 'VIP100'];
+    const VALID_CODES = ['GURUCHATVIP', 'GURUCHAT', 'CHATBASEVIP', 'GOLD2026', 'PREMIUM', 'HARSHVIP', 'FREEVIP', 'VIP100'];
 
     if (VALID_CODES.includes(clean)) {
       upgradeToPlan('lifetime');
       return { success: true, message: 'VIP Promo Code applied! Lifetime VIP Activated 👑' };
     }
 
-    return { success: false, message: 'Invalid or expired VIP promo code. Try CHATBASEVIP or GOLD2026.' };
+    return { success: false, message: 'Invalid or expired VIP promo code. Try GURUCHATVIP or GOLD2026.' };
   }, [upgradeToPlan]);
 
   // Cancel subscription
@@ -292,6 +313,11 @@ export const PremiumProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIncognitoRadarState(false);
     setChatWallpaperState('default');
 
+    localStorage.removeItem('guruchat_is_premium');
+    localStorage.removeItem('guruchat_premium_plan');
+    localStorage.removeItem('guruchat_premium_until');
+    localStorage.removeItem('guruchat_incognito_radar');
+    localStorage.removeItem('guruchat_chat_wallpaper');
     localStorage.removeItem('chatbase_is_premium');
     localStorage.removeItem('chatbase_premium_plan');
     localStorage.removeItem('chatbase_premium_until');

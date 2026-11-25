@@ -7,6 +7,7 @@ import {
   Image as ImageIcon,
   Camera,
   Video,
+  FileText,
   Heart,
   X,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ import { useChat } from '../../context/ChatContext';
 import { useBackButton } from '../../lib/useBackButton';
 import { useToast } from '../common/Toast';
 import { soundEffects } from '../../lib/soundEffects';
+import { validateAttachmentUpload } from '../../config/platformCapabilities';
 
 const QUICK_REPLIES = [
   '👍 Got it!',
@@ -47,13 +49,16 @@ export const Composer: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Restore draft when switching conversation
+  // Restore draft when switching conversation (supporting guruchat with chatbase fallback)
   useEffect(() => {
     if (!activeConversation) return;
     try {
-      const draft = localStorage.getItem(`chatbase_draft_${activeConversation.id}`);
+      const draft =
+        localStorage.getItem(`guruchat_draft_${activeConversation.id}`) ||
+        localStorage.getItem(`chatbase_draft_${activeConversation.id}`);
       if (draft) setText(draft);
       else setText('');
     } catch {}
@@ -64,8 +69,9 @@ export const Composer: React.FC = () => {
     if (!activeConversation) return;
     try {
       if (text.trim()) {
-        localStorage.setItem(`chatbase_draft_${activeConversation.id}`, text);
+        localStorage.setItem(`guruchat_draft_${activeConversation.id}`, text);
       } else {
+        localStorage.removeItem(`guruchat_draft_${activeConversation.id}`);
         localStorage.removeItem(`chatbase_draft_${activeConversation.id}`);
       }
     } catch {}
@@ -218,6 +224,33 @@ export const Composer: React.FC = () => {
     }
   };
 
+  const handleDocFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      e.target.value = '';
+
+      const validation = validateAttachmentUpload(file, 'document');
+      if (!validation.valid) {
+        showToast(validation.error || 'Invalid file.', 'error');
+        return;
+      }
+
+      showToast(`Uploading ${file.name}...`, 'info');
+      const res = await sendMessage({
+        type: 'document',
+        mediaFile: file,
+        fileName: file.name,
+        content: file.name,
+      });
+
+      if (res?.error) {
+        showToast(res.error, 'error');
+      } else {
+        showToast('Document sent!', 'success');
+      }
+    }
+  };
+
   // Support pasting images from clipboard (e.g. screenshots)
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     if (e.clipboardData.items) {
@@ -352,6 +385,13 @@ export const Composer: React.FC = () => {
         style={{ display: 'none' }}
         onChange={handleImageFileChange}
       />
+      <input
+        ref={docInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,application/pdf"
+        style={{ display: 'none' }}
+        onChange={handleDocFileChange}
+      />
 
       {/* Emoji Picker Popover */}
       {showEmojiPicker && (
@@ -424,6 +464,20 @@ export const Composer: React.FC = () => {
             <span>Video</span>
           </button>
 
+          {/* Document / Files */}
+          <button
+            className="ig-menu-item"
+            onClick={() => {
+              setShowActionsMenu(false);
+              docInputRef.current?.click();
+            }}
+          >
+            <div className="ig-menu-item-icon" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
+              <FileText size={20} />
+            </div>
+            <span>Document</span>
+          </button>
+
           {/* Stickers / Emojis */}
           <button
             className="ig-menu-item"
@@ -432,7 +486,7 @@ export const Composer: React.FC = () => {
               setShowEmojiPicker(true);
             }}
           >
-            <div className="ig-menu-item-icon" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
+            <div className="ig-menu-item-icon" style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
               <Smile size={20} />
             </div>
             <span>Stickers</span>

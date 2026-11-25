@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'online.webguruji.chatbase',
-  appName: 'ChatBase',
+  appId: 'com.harshguruji.guruchat',
+  appName: 'GuruChat',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

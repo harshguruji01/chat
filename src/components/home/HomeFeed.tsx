@@ -264,7 +264,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onStartChat, onExploreUsers 
               ✨ {getTodayDateString()}
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              ChatBase Daily
+              GuruChat Daily
             </span>
           </div>
 

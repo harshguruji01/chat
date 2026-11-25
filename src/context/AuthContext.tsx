@@ -21,6 +21,7 @@ interface AuthContextType {
   isAdmin: boolean;
   savedAccounts: SavedAccount[];
   signIn: (identifier: string, password: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
   signUp: (data: {
     username: string;
     displayName: string;
@@ -48,7 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>(() => {
     try {
-      const stored = localStorage.getItem('chatbase_saved_accounts');
+      const stored =
+        localStorage.getItem('guruchat_saved_accounts') ||
+        localStorage.getItem('chatbase_saved_accounts');
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -70,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
           ...filtered,
         ].slice(0, 5);
+        localStorage.setItem('guruchat_saved_accounts', JSON.stringify(updated));
         localStorage.setItem('chatbase_saved_accounts', JSON.stringify(updated));
         return updated;
       });
@@ -81,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const removeSavedAccount = (id: string) => {
     setSavedAccounts((prev) => {
       const updated = prev.filter((a) => a.id !== id);
+      localStorage.setItem('guruchat_saved_accounts', JSON.stringify(updated));
       localStorage.setItem('chatbase_saved_accounts', JSON.stringify(updated));
       return updated;
     });
@@ -166,7 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (fallbackData?.email) {
             emailToUse = fallbackData.email;
           } else {
-            return { error: 'Account not found. Please check your ChatBase ID or Username.' };
+            return { error: 'Account not found. Please check your GuruChat ID or Username.' };
           }
         }
       } else {
@@ -191,6 +196,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return {};
     } catch (err: any) {
       return { error: err.message || 'Failed to sign in.' };
+    }
+  };
+
+  const signInWithGoogle = async (): Promise<{ error?: string }> => {
+    try {
+      const origin =
+        typeof window !== 'undefined' ? window.location.origin : 'https://guruchat.webguruji.online';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: origin,
+        },
+      });
+      if (error) return { error: error.message };
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Google sign-in failed.' };
     }
   };
 
@@ -413,6 +435,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         savedAccounts,
         signIn,
+        signInWithGoogle,
         signUp,
         signOut,
         updateProfile,

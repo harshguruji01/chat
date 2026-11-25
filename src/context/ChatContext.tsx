@@ -6,6 +6,7 @@ import { triggerHaptics } from '../lib/utils';
 import { compressImage, compressAvatar } from '../lib/compression';
 import { soundEffects } from '../lib/soundEffects';
 import { showSystemNotification, requestNotificationPermission } from '../lib/notifications';
+import { getActivePlatformPolicies } from '../config/platformCapabilities';
 
 interface ChatContextType {
   conversations: Conversation[];
@@ -31,7 +32,10 @@ interface ChatContextType {
     mediaFile?: File | Blob;
     duration?: number;
     replyTo?: Message | null;
+    fileName?: string;
   }) => Promise<{ error?: string }>;
+  editMessage: (messageId: string, newContent: string) => Promise<{ error?: string }>;
+  forwardMessage: (message: Message, targetConversationId: string) => Promise<{ error?: string }>;
   deleteMessage: (messageId: string, forEveryone: boolean) => Promise<{ error?: string }>;
   clearChat: (convId: string) => Promise<{ error?: string }>;
   deleteConversation: (convId: string) => Promise<{ error?: string }>;
@@ -173,7 +177,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // 1. Instant 0ms Cache Render: display stored messages immediately while network fetches
     try {
-      const cachedStr = sessionStorage.getItem(`chatbase_cache_${convId}`);
+      const cachedStr =
+        sessionStorage.getItem(`guruchat_cache_${convId}`) ||
+        sessionStorage.getItem(`chatbase_cache_${convId}`);
       if (cachedStr) {
         const cachedMsgs = JSON.parse(cachedStr);
         if (Array.isArray(cachedMsgs) && cachedMsgs.length > 0) {
@@ -213,7 +219,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Update instant cache for next time
         try {
-          sessionStorage.setItem(`chatbase_cache_${convId}`, JSON.stringify(visibleMessages.slice(-60)));
+          sessionStorage.setItem(`guruchat_cache_${convId}`, JSON.stringify(visibleMessages.slice(-60)));
         } catch {}
 
         // Mark unread as 0 in membership and immediately update local state
@@ -320,9 +326,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .eq('id', newMsg.sender_id)
               .single()
               .then(({ data: senderProfile }) => {
-                const senderName = senderProfile?.display_name || senderProfile?.username || 'ChatBase';
+                const senderName = senderProfile?.display_name || senderProfile?.username || 'GuruChat';
                 showSystemNotification({
-                  title: `${senderName} • ChatBase`,
+                  title: `${senderName} • GuruChat`,
                   body: formatNotificationSnippet(newMsg),
                   conversationId: newMsg.conversation_id,
                   avatarUrl: senderProfile?.avatar_url || undefined,
@@ -400,9 +406,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Trigger Force System Notification for incoming instant message
         if (payload.sender_id !== user.id) {
           const senderProfile = payload.sender as Profile | undefined;
-          const senderName = senderProfile?.display_name || senderProfile?.username || 'ChatBase';
+          const senderName = senderProfile?.display_name || senderProfile?.username || 'GuruChat';
           showSystemNotification({
-            title: `${senderName} • ChatBase`,
+            title: `${senderName} • GuruChat`,
             body: formatNotificationSnippet(payload),
             conversationId: payload.conversation_id,
             avatarUrl: senderProfile?.avatar_url || undefined,
@@ -430,6 +436,38 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setMessages((prev) =>
           prev.map((m) =>
             m.id === payload.temp_id ? { ...m, id: payload.real_id } : m
+          )
+        );
+      })
+      .on('broadcast', { event: 'message_edited' }, (eventObj: any) => {
+        const payload = eventObj.payload;
+        if (!payload) return;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === payload.message_id
+              ? {
+                  ...m,
+                  content: payload.new_content,
+                  is_edited: true,
+                  edited_at: payload.edited_at,
+                }
+              : m
+          )
+        );
+      })
+      .on('broadcast', { event: 'message_deleted' }, (eventObj: any) => {
+        const payload = eventObj.payload;
+        if (!payload) return;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === payload.message_id
+              ? {
+                  ...m,
+                  deleted_for_everyone: true,
+                  content: 'This message was deleted.',
+                  media_url: null,
+                }
+              : m
           )
         );
       })
@@ -736,12 +774,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     mediaFile,
     duration,
     replyTo,
+    fileName,
   }: {
     type: MessageType;
     content?: string;
     mediaFile?: File | Blob;
     duration?: number;
     replyTo?: Message | null;
+    fileName?: string;
   }) => {
     if (!user || !activeConversation) return { error: 'No active conversation.' };
 
@@ -765,6 +805,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (type === 'voice') summaryText = '🎤 Voice note';
     else if (type === 'video') summaryText = '📹 Video message';
     else if (type === 'image') summaryText = content.trim() ? `📷 ${content.trim()}` : '📷 Photo';
+    else if (type === 'document') summaryText = fileName ? `📄 ${fileName}` : (content.trim() || '📄 Document');
     else if (type === 'like') summaryText = '❤️';
 
     // Format quoted reply metadata
@@ -805,6 +846,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       media_url: localPreviewUrl,
       media_duration: duration || null,
       media_size_bytes: mediaFile?.size || null,
+      file_name: fileName || (mediaFile as File)?.name || null,
       status: 'sent',
       deleted_for_everyone: false,
       deleted_by_users: [],
@@ -893,6 +935,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             ext = 'webm';
           }
+        } else if (type === 'document') {
+          const rawName = fileName || (fileToUpload as File).name || 'file.pdf';
+          const dot = rawName.lastIndexOf('.');
+          ext = dot !== -1 ? rawName.slice(dot + 1).toLowerCase() : 'pdf';
         }
 
         const filePath = `${user.id}/${activeConversation.id}/${Date.now()}.${ext}`;
@@ -934,6 +980,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           media_url: mediaUrl,
           media_duration: duration || null,
           media_size_bytes: mediaSizeBytes || null,
+          file_name: fileName || (mediaFile as File)?.name || null,
           status: 'sent',
           expires_at: expiresAt,
         })
@@ -1022,6 +1069,33 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('sender_id', user.id);
 
         if (error) return { error: error.message };
+
+        // Broadcast deletion to recipient in real time
+        try {
+          activeChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'message_deleted',
+            payload: {
+              message_id: messageId,
+              conversation_id: activeConversation?.id,
+            },
+          });
+        } catch {
+          // ignore
+        }
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  deleted_for_everyone: true,
+                  content: 'This message was deleted.',
+                  media_url: null,
+                }
+              : m
+          )
+        );
       } else {
         // Delete for me
         const msg = messages.find((m) => m.id === messageId);
@@ -1042,6 +1116,132 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return {};
     } catch (err: any) {
       return { error: err.message };
+    }
+  };
+
+  // Edit message
+  const editMessage = async (messageId: string, newContent: string): Promise<{ error?: string }> => {
+    if (!user) return { error: 'Not authenticated.' };
+    const cleanContent = newContent.trim();
+    if (!cleanContent) return { error: 'Message cannot be empty.' };
+
+    const targetMsg = messages.find((m) => m.id === messageId);
+    if (!targetMsg) return { error: 'Message not found.' };
+    if (targetMsg.sender_id !== user.id) return { error: 'You can only edit your own messages.' };
+
+    const policies = getActivePlatformPolicies();
+    const msgAgeMinutes = (Date.now() - new Date(targetMsg.created_at).getTime()) / (1000 * 60);
+    if (policies.messaging.editWindowMinutes > 0 && msgAgeMinutes > policies.messaging.editWindowMinutes) {
+      return { error: `Messages can only be edited within ${policies.messaging.editWindowMinutes} minutes of sending.` };
+    }
+
+    const editedAt = new Date().toISOString();
+
+    // Optimistic update
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId ? { ...m, content: cleanContent, is_edited: true, edited_at: editedAt } : m
+      )
+    );
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({
+          content: cleanContent,
+          is_edited: true,
+          edited_at: editedAt,
+        })
+        .eq('id', messageId)
+        .eq('sender_id', user.id);
+
+      if (error) {
+        // Rollback
+        setMessages((prev) =>
+          prev.map((m) => (m.id === messageId ? targetMsg : m))
+        );
+        return { error: error.message };
+      }
+
+      // Broadcast edit in real time
+      try {
+        activeChannelRef.current?.send({
+          type: 'broadcast',
+          event: 'message_edited',
+          payload: {
+            message_id: messageId,
+            conversation_id: activeConversation?.id,
+            new_content: cleanContent,
+            edited_at: editedAt,
+          },
+        });
+      } catch {
+        // ignore
+      }
+
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Failed to edit message.' };
+    }
+  };
+
+  // Forward message to another conversation
+  const forwardMessage = async (
+    messageToForward: Message,
+    targetConversationId: string
+  ): Promise<{ error?: string }> => {
+    if (!user) return { error: 'Not authenticated.' };
+    try {
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const summaryText =
+        messageToForward.content ||
+        (messageToForward.type === 'image'
+          ? '📷 Photo'
+          : messageToForward.type === 'voice'
+          ? '🎤 Voice note'
+          : messageToForward.type === 'video'
+          ? '📹 Video'
+          : messageToForward.type === 'document'
+          ? `📄 ${messageToForward.file_name || 'Document'}`
+          : 'Message');
+
+      const { data: newMsg, error: insertErr } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: targetConversationId,
+          sender_id: user.id,
+          type: messageToForward.type,
+          content: messageToForward.content || '',
+          media_url: messageToForward.media_url,
+          media_duration: messageToForward.media_duration,
+          media_size_bytes: messageToForward.media_size_bytes,
+          file_name: messageToForward.file_name,
+          status: 'sent',
+          expires_at: expiresAt,
+        })
+        .select('*, sender:sender_id(*)')
+        .single();
+
+      if (insertErr) return { error: insertErr.message };
+
+      await supabase
+        .from('conversations')
+        .update({
+          last_message_text: summaryText,
+          last_message_at: new Date().toISOString(),
+        })
+        .eq('id', targetConversationId);
+
+      await fetchConversations();
+
+      // If forwarding to current active conversation, add message
+      if (activeConversation?.id === targetConversationId && newMsg) {
+        setMessages((prev) => [...prev, newMsg as Message]);
+      }
+
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Failed to forward message.' };
     }
   };
 
@@ -1214,6 +1414,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addGroupMembers,
         leaveGroup,
         sendMessage,
+        editMessage,
+        forwardMessage,
         deleteMessage,
         clearChat,
         deleteConversation,

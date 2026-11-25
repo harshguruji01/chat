@@ -116,7 +116,7 @@ export const InterstitialAdModal: React.FC<InterstitialAdModalProps> = ({ isOpen
 
           <div>
             <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-              ChatBase Pro on WebGuruJi
+              GuruChat Pro on WebGuruJi
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '6px', fontSize: '0.82rem', color: '#F59E0B' }}>
               <Star size={14} fill="#F59E0B" />

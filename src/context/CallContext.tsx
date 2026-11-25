@@ -61,7 +61,6 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const callTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
-  const incomingChannelRef = useRef<any>(null);
 
   // Keep localStreamRef in sync
   useEffect(() => {
@@ -117,12 +116,9 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (callId && partnerId && user) {
       try {
-        const sendChannel = supabase.channel(`chatbase-call-${partnerId}`);
-        sendChannel.send({
-          type: 'broadcast',
-          event: 'call_end',
-          payload: { callId, fromId: user.id, reason },
-        });
+        const payload = { callId, fromId: user.id, reason };
+        supabase.channel(`guruchat-call-${partnerId}`).send({ type: 'broadcast', event: 'call_end', payload }).catch(() => {});
+        supabase.channel(`chatbase-call-${partnerId}`).send({ type: 'broadcast', event: 'call_end', payload }).catch(() => {});
       } catch {
         // ignore
       }
@@ -156,122 +152,116 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase.channel(`chatbase-call-${user.id}`);
+    const channels = [
+      supabase.channel(`guruchat-call-${user.id}`),
+      supabase.channel(`chatbase-call-${user.id}`),
+    ];
 
-    channel
-      .on('broadcast', { event: 'call_invite' }, async ({ payload }) => {
-        // If already busy in a call, reject automatically
-        if (activeCallIdRef.current && activeCallIdRef.current !== payload.callId) {
-          const rejectChannel = supabase.channel(`chatbase-call-${payload.fromId}`);
-          rejectChannel.send({
-            type: 'broadcast',
-            event: 'call_reject',
-            payload: { callId: payload.callId, reason: 'busy' },
-          });
-          return;
-        }
-
-        activeCallIdRef.current = payload.callId;
-        targetUserIdRef.current = payload.fromId;
-        conversationIdRef.current = payload.conversationId || null;
-        setPartnerProfile(payload.caller);
-        setCallType(payload.callType || 'video');
-        setCallState('incoming');
-        soundEffects.startRingtone();
-        triggerHaptics(30);
-      })
-      .on('broadcast', { event: 'call_accept' }, async ({ payload }) => {
-        if (payload.callId !== activeCallIdRef.current) return;
-        soundEffects.stopDialing();
-        soundEffects.play('call_connect');
-        setCallState('connected');
-
-        // Caller creates WebRTC Offer
-        try {
-          if (!peerConnectionRef.current) {
-            setupPeerConnection(targetUserIdRef.current!);
+    channels.forEach((channel) => {
+      channel
+        .on('broadcast', { event: 'call_invite' }, async ({ payload }) => {
+          // If already busy in a call, reject automatically
+          if (activeCallIdRef.current && activeCallIdRef.current !== payload.callId) {
+            const rejectPayload = { callId: payload.callId, reason: 'busy' };
+            supabase.channel(`guruchat-call-${payload.fromId}`).send({ type: 'broadcast', event: 'call_reject', payload: rejectPayload }).catch(() => {});
+            supabase.channel(`chatbase-call-${payload.fromId}`).send({ type: 'broadcast', event: 'call_reject', payload: rejectPayload }).catch(() => {});
+            return;
           }
-          const pc = peerConnectionRef.current;
-          if (pc) {
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
 
-            const sendChannel = supabase.channel(`chatbase-call-${targetUserIdRef.current}`);
-            sendChannel.send({
-              type: 'broadcast',
-              event: 'webrtc_signal',
-              payload: {
+          activeCallIdRef.current = payload.callId;
+          targetUserIdRef.current = payload.fromId;
+          conversationIdRef.current = payload.conversationId || null;
+          setPartnerProfile(payload.caller);
+          setCallType(payload.callType || 'video');
+          setCallState('incoming');
+          soundEffects.startRingtone();
+          triggerHaptics(30);
+        })
+        .on('broadcast', { event: 'call_accept' }, async ({ payload }) => {
+          if (payload.callId !== activeCallIdRef.current) return;
+          soundEffects.stopDialing();
+          soundEffects.play('call_connect');
+          setCallState('connected');
+
+          // Caller creates WebRTC Offer
+          try {
+            if (!peerConnectionRef.current) {
+              setupPeerConnection(targetUserIdRef.current!);
+            }
+            const pc = peerConnectionRef.current;
+            if (pc) {
+              const offer = await pc.createOffer();
+              await pc.setLocalDescription(offer);
+
+              const sigPayload = {
                 callId: payload.callId,
                 fromId: user.id,
                 type: 'offer',
                 sdp: offer,
-              },
-            });
+              };
+              supabase.channel(`guruchat-call-${targetUserIdRef.current}`).send({ type: 'broadcast', event: 'webrtc_signal', payload: sigPayload }).catch(() => {});
+              supabase.channel(`chatbase-call-${targetUserIdRef.current}`).send({ type: 'broadcast', event: 'webrtc_signal', payload: sigPayload }).catch(() => {});
+            }
+          } catch (err) {
+            console.error('Error creating offer:', err);
           }
-        } catch (err) {
-          console.error('Error creating offer:', err);
-        }
 
-        // Start call duration timer
-        setCallDuration(0);
-        if (callTimerRef.current) clearInterval(callTimerRef.current);
-        callTimerRef.current = setInterval(() => {
-          setCallDuration((prev) => prev + 1);
-        }, 1000);
-      })
-      .on('broadcast', { event: 'call_reject' }, ({ payload }) => {
-        if (payload.callId !== activeCallIdRef.current) return;
-        soundEffects.stopDialing();
-        soundEffects.play('call_end');
-        setCallState('ended');
-        setTimeout(() => {
-          cleanupMediaAndTracks();
-          setCallState('idle');
-          setPartnerProfile(null);
-        }, 1500);
-      })
-      .on('broadcast', { event: 'call_end' }, ({ payload }) => {
-        if (payload.callId === activeCallIdRef.current) {
-          endCall('Remote user ended the call');
-        }
-      })
-      .on('broadcast', { event: 'webrtc_signal' }, async ({ payload }) => {
-        if (payload.callId !== activeCallIdRef.current) return;
-        const pc = peerConnectionRef.current;
-        if (!pc) return;
+          // Start call duration timer
+          setCallDuration(0);
+          if (callTimerRef.current) clearInterval(callTimerRef.current);
+          callTimerRef.current = setInterval(() => {
+            setCallDuration((prev) => prev + 1);
+          }, 1000);
+        })
+        .on('broadcast', { event: 'call_reject' }, ({ payload }) => {
+          if (payload.callId !== activeCallIdRef.current) return;
+          soundEffects.stopDialing();
+          soundEffects.play('call_end');
+          setCallState('ended');
+          setTimeout(() => {
+            cleanupMediaAndTracks();
+            setCallState('idle');
+            setPartnerProfile(null);
+          }, 1500);
+        })
+        .on('broadcast', { event: 'call_end' }, ({ payload }) => {
+          if (payload.callId === activeCallIdRef.current) {
+            endCall('Remote user ended the call');
+          }
+        })
+        .on('broadcast', { event: 'webrtc_signal' }, async ({ payload }) => {
+          if (payload.callId !== activeCallIdRef.current) return;
+          const pc = peerConnectionRef.current;
+          if (!pc) return;
 
-        try {
-          if (payload.type === 'offer') {
-            await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
+          try {
+            if (payload.type === 'offer') {
+              await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+              const answer = await pc.createAnswer();
+              await pc.setLocalDescription(answer);
 
-            const sendChannel = supabase.channel(`chatbase-call-${payload.fromId}`);
-            sendChannel.send({
-              type: 'broadcast',
-              event: 'webrtc_signal',
-              payload: {
+              const ansPayload = {
                 callId: payload.callId,
                 fromId: user.id,
                 type: 'answer',
                 sdp: answer,
-              },
-            });
-          } else if (payload.type === 'answer') {
-            await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-          } else if (payload.type === 'candidate' && payload.candidate) {
-            await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+              };
+              supabase.channel(`guruchat-call-${payload.fromId}`).send({ type: 'broadcast', event: 'webrtc_signal', payload: ansPayload }).catch(() => {});
+              supabase.channel(`chatbase-call-${payload.fromId}`).send({ type: 'broadcast', event: 'webrtc_signal', payload: ansPayload }).catch(() => {});
+            } else if (payload.type === 'answer') {
+              await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+            } else if (payload.type === 'candidate' && payload.candidate) {
+              await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+            }
+          } catch (err) {
+            console.error('WebRTC signal processing error:', err);
           }
-        } catch (err) {
-          console.error('WebRTC signal processing error:', err);
-        }
-      })
-      .subscribe();
-
-    incomingChannelRef.current = channel;
+        })
+        .subscribe();
+    });
 
     return () => {
-      supabase.removeChannel(channel);
+      channels.forEach((ch) => supabase.removeChannel(ch));
       cleanupMediaAndTracks();
     };
   }, [user, cleanupMediaAndTracks, endCall]);
@@ -298,17 +288,14 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Send ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate && user) {
-        const sendChannel = supabase.channel(`chatbase-call-${targetUserId}`);
-        sendChannel.send({
-          type: 'broadcast',
-          event: 'webrtc_signal',
-          payload: {
-            callId: activeCallIdRef.current,
-            fromId: user.id,
-            type: 'candidate',
-            candidate: event.candidate,
-          },
-        });
+        const candPayload = {
+          callId: activeCallIdRef.current,
+          fromId: user.id,
+          type: 'candidate',
+          candidate: event.candidate,
+        };
+        supabase.channel(`guruchat-call-${targetUserId}`).send({ type: 'broadcast', event: 'webrtc_signal', payload: candPayload }).catch(() => {});
+        supabase.channel(`chatbase-call-${targetUserId}`).send({ type: 'broadcast', event: 'webrtc_signal', payload: candPayload }).catch(() => {});
       }
     };
 
@@ -346,18 +333,15 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Broadcast call invitation to target user
-    const sendChannel = supabase.channel(`chatbase-call-${targetUser.id}`);
-    sendChannel.send({
-      type: 'broadcast',
-      event: 'call_invite',
-      payload: {
-        callId,
-        fromId: user.id,
-        caller: profile || { id: user.id, display_name: user.email?.split('@')[0] || 'User' },
-        callType: type,
-        conversationId,
-      },
-    });
+    const invPayload = {
+      callId,
+      fromId: user.id,
+      caller: profile || { id: user.id, display_name: user.email?.split('@')[0] || 'User' },
+      callType: type,
+      conversationId,
+    };
+    supabase.channel(`guruchat-call-${targetUser.id}`).send({ type: 'broadcast', event: 'call_invite', payload: invPayload }).catch(() => {});
+    supabase.channel(`chatbase-call-${targetUser.id}`).send({ type: 'broadcast', event: 'call_invite', payload: invPayload }).catch(() => {});
 
     // Auto timeout after 45 seconds if unanswered
     setTimeout(() => {
@@ -390,15 +374,12 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCallDuration(0);
 
     // Notify caller that call was accepted
-    const sendChannel = supabase.channel(`chatbase-call-${targetUserIdRef.current}`);
-    sendChannel.send({
-      type: 'broadcast',
-      event: 'call_accept',
-      payload: {
-        callId: activeCallIdRef.current,
-        fromId: user.id,
-      },
-    });
+    const accPayload = {
+      callId: activeCallIdRef.current,
+      fromId: user.id,
+    };
+    supabase.channel(`guruchat-call-${targetUserIdRef.current}`).send({ type: 'broadcast', event: 'call_accept', payload: accPayload }).catch(() => {});
+    supabase.channel(`chatbase-call-${targetUserIdRef.current}`).send({ type: 'broadcast', event: 'call_accept', payload: accPayload }).catch(() => {});
 
     // Start timer
     if (callTimerRef.current) clearInterval(callTimerRef.current);
@@ -414,12 +395,9 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const callerId = targetUserIdRef.current;
 
     if (callId && callerId && user) {
-      const sendChannel = supabase.channel(`chatbase-call-${callerId}`);
-      sendChannel.send({
-        type: 'broadcast',
-        event: 'call_reject',
-        payload: { callId, fromId: user.id, reason },
-      });
+      const rejPayload = { callId, fromId: user.id, reason };
+      supabase.channel(`guruchat-call-${callerId}`).send({ type: 'broadcast', event: 'call_reject', payload: rejPayload }).catch(() => {});
+      supabase.channel(`chatbase-call-${callerId}`).send({ type: 'broadcast', event: 'call_reject', payload: rejPayload }).catch(() => {});
     }
 
     cleanupMediaAndTracks();

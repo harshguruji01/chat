@@ -92,7 +92,7 @@ export const BottomStickyAd: React.FC = () => {
               SPONSORED
             </span>
             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ffffff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              ChatBase Android Official App
+              GuruChat Android Official App
             </span>
           </div>
           <div style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

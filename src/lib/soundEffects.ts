@@ -1,4 +1,4 @@
-// Web Audio API Sound Effects Synthesizer for ChatBase
+// Web Audio API Sound Effects Synthesizer for GuruChat
 // Completely zero external assets required - 100% synthesized in-browser
 
 type SoundType = 'send' | 'receive' | 'reaction' | 'click' | 'pop' | 'notify' | 'call_connect' | 'call_end';
@@ -8,7 +8,7 @@ class SoundEffectsManager {
   private enabled: boolean = true;
 
   constructor() {
-    const saved = localStorage.getItem('chatbase_sound_enabled');
+    const saved = localStorage.getItem('guruchat_sound_enabled') || localStorage.getItem('chatbase_sound_enabled');
     this.enabled = saved !== null ? saved === 'true' : true;
   }
 
@@ -36,7 +36,7 @@ class SoundEffectsManager {
 
   public setEnabled(val: boolean): void {
     this.enabled = val;
-    localStorage.setItem('chatbase_sound_enabled', String(val));
+    localStorage.setItem('guruchat_sound_enabled', String(val));
   }
 
   public toggle(): boolean {
