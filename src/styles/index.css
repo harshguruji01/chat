@@ -123,6 +123,26 @@ input, textarea, button, select {
   color: inherit;
 }
 
+input, textarea, [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+  caret-color: var(--color-primary);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.9;
+}
+
+select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+p, span, h1, h2, h3, h4, h5, h6, div {
+  overflow-wrap: break-word;
+}
+
 /* Scrollbar Customization */
 ::-webkit-scrollbar {
   width: 6px;
