@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 .env
 .env*.local
+Auth for GuruChat
 
 # Android build outputs
 android/app/build/
