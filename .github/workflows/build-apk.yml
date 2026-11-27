@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Guru Chat Android APK
 
 on:
   push:
@@ -10,36 +10,44 @@ permissions:
 
 jobs:
   build-apk:
-    name: Build ChatBase APK
+    name: Build Guru Chat APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 22
+          cache: 'pnpm'
 
-      - name: Setup Java 17
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Lint & Tests
+        run: pnpm run lint && pnpm test
 
       - name: Build Web Production Bundle
-        run: npm run build
+        run: pnpm run build
 
       - name: Sync Capacitor Android
-        run: npx cap sync android
+        run: pnpm exec cap sync android
 
       - name: Build APK with Gradle
         working-directory: ./android
@@ -50,31 +58,28 @@ jobs:
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ChatBase-debug-apk
+          name: GuruChat-v3.0.0-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
 
       - name: Prepare Release APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/chatbase.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/guruchat-v3.0.0.apk
 
       - name: Publish APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: "ChatBase APK v1.0.0 (VIP Premium Edition)"
+          tag_name: v3.0.0
+          name: "Guru Chat v3.0.0 (Android + Web)"
           body: |
-            ### 🚀 ChatBase Android APK - VIP Premium Edition
-            
-            **What's New in this Build:**
-            - 👑 **ChatBase VIP Membership Hub**: Gold prestige badges, membership management, and tier selection.
-            - 🚫 **100% Ad-Free**: Ad banners, sponsored feed posts, and interstitial popups suppressed for VIP users.
-            - ⚡ **Unlimited GuruJi AI Copilot**: Unlimited messages with high-speed priority responses.
-            - 👻 **Ghost Incognito Radar**: Scan nearby users privately without revealing GPS location.
-            - 🧭 **150km Proximity Booster**: Extended nearby radar scanner.
-            - 🎨 **Exclusive VIP Themes & Wallpapers**: Cosmic Galaxy, Emerald Aurora, Luxury Velvet Gold, and Cyberpunk Neon.
-            - 🎁 **VIP Promo Code Redemption** (e.g. `CHATBASEVIP`, `GOLD2026`, `PREMIUM`).
-          files: android/app/build/outputs/apk/debug/chatbase.apk
+            ### 🚀 Guru Chat v3.0.0 — By HarshGuruJi
+
+            **Highlights:**
+            - 💬 Real-time 1:1 & Group Messaging (replies, reactions, pins, roles, announcement mode)
+            - 📞 Authenticated 1:1 Voice & Video Calls (Web ↔ Android WebRTC + TURN support)
+            - 🎥 Group Conferencing (scheduled & instant meetings, screen share, raise hand, host controls, breakout rooms)
+            - 👥 Contact Directory & Granular Privacy Controls
+            - 🔔 Cross-Platform Notifications & Device Session Management
+          files: android/app/build/outputs/apk/debug/guruchat-v3.0.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
