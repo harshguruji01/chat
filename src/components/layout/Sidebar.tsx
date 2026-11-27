@@ -6,6 +6,10 @@ import {
   Radio,
   Search,
   User,
+  Phone,
+  Video,
+  Bell,
+  UserCheck,
   Moon,
   Sun,
   Laptop,
@@ -196,7 +200,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>{t('chats')}</span>
         </button>
 
-        {/* 3. Communities */}
+        {/* 3. Contacts */}
+        <button
+          className={`desktop-nav-btn ${activeTab === 'contacts' ? 'active' : ''}`}
+          onClick={() => {
+            soundEffects.play('click');
+            onSelectTab('contacts');
+          }}
+        >
+          <UserCheck size={19} />
+          <span>Contacts</span>
+        </button>
+
+        {/* 4. Calls */}
+        <button
+          className={`desktop-nav-btn ${activeTab === 'calls' ? 'active' : ''}`}
+          onClick={() => {
+            soundEffects.play('click');
+            onSelectTab('calls');
+          }}
+        >
+          <Phone size={19} />
+          <span>Calls</span>
+        </button>
+
+        {/* 5. Conferences */}
+        <button
+          className={`desktop-nav-btn ${activeTab === 'conferences' ? 'active' : ''}`}
+          onClick={() => {
+            soundEffects.play('click');
+            onSelectTab('conferences');
+          }}
+        >
+          <Video size={19} />
+          <span>Meetings</span>
+        </button>
+
+        {/* 6. Notifications */}
+        <button
+          className={`desktop-nav-btn ${activeTab === 'notifications' ? 'active' : ''}`}
+          onClick={() => {
+            soundEffects.play('click');
+            onSelectTab('notifications');
+          }}
+        >
+          <Bell size={19} />
+          <span>Notifications</span>
+        </button>
+
+        {/* 7. Communities */}
         <button
           className={`desktop-nav-btn ${activeTab === 'communities' ? 'active' : ''}`}
           onClick={() => {
@@ -205,7 +257,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }}
         >
           <Users size={19} />
-          <span>Communities</span>
+          <span>Groups</span>
         </button>
 
         {/* 4. Channels */}

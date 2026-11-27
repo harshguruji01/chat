@@ -23,6 +23,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -97,6 +98,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
 
     if (password !== confirmPassword) {
       showToast('Passwords do not match.', 'error');
+      return;
+    }
+
+    if (!acceptedTerms) {
+      showToast('Please accept the Terms of Service and Privacy Policy.', 'error');
       return;
     }
 
@@ -393,17 +399,31 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <input
-              type="checkbox"
-              id="show-pass"
-              checked={showPassword}
-              onChange={() => setShowPassword(!showPassword)}
-              style={{ cursor: 'pointer' }}
-            />
-            <label htmlFor="show-pass" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-              Show password
-            </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="checkbox"
+                id="show-pass"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+                style={{ cursor: 'pointer' }}
+              />
+              <label htmlFor="show-pass" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                Show password
+              </label>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input
+                type="checkbox"
+                id="accept-terms"
+                checked={acceptedTerms}
+                onChange={() => setAcceptedTerms(!acceptedTerms)}
+                style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+              />
+              <label htmlFor="accept-terms" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                I agree to Guru Chat&apos;s Terms of Service &amp; Privacy Policy.
+              </label>
+            </div>
           </div>
 
           <OutlinedButton

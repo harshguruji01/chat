@@ -12,7 +12,7 @@ interface LoginScreenProps {
 }
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister }) => {
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, resetPassword } = useAuth();
   const { showToast } = useToast();
 
   const [identifier, setIdentifier] = useState('');
@@ -48,12 +48,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister }) => {
       return;
     }
     setIsResetting(true);
-    // Simulating / initiating password recovery
-    setTimeout(() => {
-      setIsResetting(false);
+    const { error } = await resetPassword(resetEmail);
+    setIsResetting(false);
+    if (error) {
+      showToast(error, 'error');
+    } else {
       setIsForgotPasswordOpen(false);
-      showToast('Password reset instructions sent to your email!', 'success');
-    }, 1000);
+      showToast('Password reset link sent to your email!', 'success');
+    }
   };
 
   return (

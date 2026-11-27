@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, MessageSquare, Users, Radio, User, Crown } from 'lucide-react';
+import { MessageSquare, Users, Phone, Bell, User, Crown } from 'lucide-react';
 import type { TabType } from '../../types';
 import { useChat } from '../../context/ChatContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -19,17 +19,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab }) 
 
   return (
     <nav className="bottom-nav">
-      {/* 1. Home */}
-      <button
-        className={`bottom-nav-item ${activeTab === 'home' ? 'active' : ''}`}
-        onClick={() => onSelectTab('home')}
-        title={t('home')}
-      >
-        <Home size={21} />
-        <span>{t('home')}</span>
-      </button>
-
-      {/* 2. Chats */}
+      {/* 1. Chats */}
       <button
         className={`bottom-nav-item ${activeTab === 'chat' ? 'active' : ''}`}
         onClick={() => onSelectTab('chat')}
@@ -42,24 +32,34 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab }) 
         <span>{t('chats')}</span>
       </button>
 
-      {/* 3. Communities */}
+      {/* 2. Contacts */}
       <button
-        className={`bottom-nav-item ${activeTab === 'communities' ? 'active' : ''}`}
-        onClick={() => onSelectTab('communities')}
-        title="Communities"
+        className={`bottom-nav-item ${activeTab === 'contacts' ? 'active' : ''}`}
+        onClick={() => onSelectTab('contacts')}
+        title="Contacts"
       >
         <Users size={21} />
-        <span>Groups</span>
+        <span>Contacts</span>
       </button>
 
-      {/* 4. Channels */}
+      {/* 3. Calls */}
       <button
-        className={`bottom-nav-item ${activeTab === 'channels' ? 'active' : ''}`}
-        onClick={() => onSelectTab('channels')}
-        title="Channels"
+        className={`bottom-nav-item ${activeTab === 'calls' ? 'active' : ''}`}
+        onClick={() => onSelectTab('calls')}
+        title="Calls"
       >
-        <Radio size={21} />
-        <span>Channels</span>
+        <Phone size={21} />
+        <span>Calls</span>
+      </button>
+
+      {/* 4. Notifications */}
+      <button
+        className={`bottom-nav-item ${activeTab === 'notifications' ? 'active' : ''}`}
+        onClick={() => onSelectTab('notifications')}
+        title="Notifications"
+      >
+        <Bell size={21} />
+        <span>Alerts</span>
       </button>
 
       {/* 5. Profile */}

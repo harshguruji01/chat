@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase';
 import type { Profile } from '../types';
 import type { User, Session } from '@supabase/supabase-js';
 import { compressAvatar } from '../lib/compression';
+import { registerCurrentDeviceSession, getEffectiveAccountState } from '../services/authService';
+import { getOAuthRedirectUrl } from '../config/environment';
 
 export interface SavedAccount {
   id: string;
@@ -19,6 +21,7 @@ interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   isAdmin: boolean;
+  accountAccess: { allowed: boolean; state: string; reason?: string };
   savedAccounts: SavedAccount[];
   signIn: (identifier: string, password: string) => Promise<{ error?: string }>;
   signInWithGoogle: () => Promise<{ error?: string }>;
@@ -124,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
+        registerCurrentDeviceSession(session.user.id).catch(() => {});
       }
       setIsLoading(false);
     });
@@ -134,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         if (session?.user) {
           await fetchProfile(session.user.id);
+          registerCurrentDeviceSession(session.user.id).catch(() => {});
         } else {
           setProfile(null);
         }
@@ -201,12 +206,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async (): Promise<{ error?: string }> => {
     try {
-      const origin =
-        typeof window !== 'undefined' ? window.location.origin : 'https://guruchat.webguruji.online';
+      const redirectTo = getOAuthRedirectUrl();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: origin,
+          redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
         },
       });
       if (error) return { error: error.message };
@@ -424,6 +432,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = profile?.role === 'admin';
+  const accountAccess = getEffectiveAccountState(profile, user);
 
   return (
     <AuthContext.Provider
@@ -433,6 +442,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         isLoading,
         isAdmin,
+        accountAccess,
         savedAccounts,
         signIn,
         signInWithGoogle,

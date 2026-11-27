@@ -7,6 +7,7 @@ import { PremiumProvider } from './context/PremiumContext';
 import { ChatProvider } from './context/ChatContext';
 import { CallProvider } from './context/CallContext';
 import { SplashScreen } from './components/auth/SplashScreen';
+import { PublicLandingScreen } from './components/auth/PublicLandingScreen';
 import { LoginScreen } from './components/auth/LoginScreen';
 import { RegisterScreen } from './components/auth/RegisterScreen';
 import { MainLayout } from './components/layout/MainLayout';
@@ -17,9 +18,9 @@ import { FloatingCallBubble } from './components/call/FloatingCallBubble';
 import { AdminControlCenter } from './components/admin/AdminControlCenter';
 
 const GuruChatApp: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, signInWithGoogle } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
-  const [authView, setAuthView] = useState<'login' | 'register'>('login');
+  const [authView, setAuthView] = useState<'landing' | 'login' | 'register'>('landing');
   const [isAdminView, setIsAdminView] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return (
@@ -70,8 +71,19 @@ const GuruChatApp: React.FC = () => {
     return null;
   }
 
-  // If user is not authenticated, show Login or Register
+  // If user is not authenticated, show Public Landing, Login, or Register
   if (!user) {
+    if (authView === 'landing') {
+      return (
+        <PublicLandingScreen
+          onOpenWebApp={() => setAuthView('login')}
+          onSignInWithGoogle={() => {
+            signInWithGoogle().catch(() => setAuthView('login'));
+          }}
+          onCreateAccount={() => setAuthView('register')}
+        />
+      );
+    }
     return authView === 'login' ? (
       <LoginScreen onGoToRegister={() => setAuthView('register')} />
     ) : (

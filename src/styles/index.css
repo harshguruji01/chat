@@ -3,15 +3,18 @@
   --font-brand: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* GuruChats Vibrant Green/Teal WhatsApp-Style Palette */
-  --color-primary: #00A884;
-  --color-primary-hover: #008f6f;
-  --color-primary-light: rgba(0, 168, 132, 0.14);
-  --color-accent: #10B981;
-  --color-teal: #059669;
-  --color-tick-blue: #53bdeb;
-  --gradient-brand: linear-gradient(135deg, #00A884 0%, #10B981 50%, #059669 100%);
-  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
+  /* Guru Chat Premium Blue / Violet / Cyan Palette */
+  --color-primary: #6366F1;
+  --color-primary-hover: #4F46E5;
+  --color-primary-light: rgba(99, 102, 241, 0.14);
+  --color-blue: #3B82F6;
+  --color-violet: #8B5CF6;
+  --color-cyan: #06B6D4;
+  --color-accent: #06B6D4;
+  --color-teal: #0EA5E9;
+  --color-tick-blue: #38BDF8;
+  --gradient-brand: linear-gradient(135deg, #3B82F6 0%, #6366F1 50%, #06B6D4 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(99, 102, 241, 0.06) 0%, rgba(6, 182, 212, 0.02) 100%);
 
   /* Success, Warning, Danger */
   --color-success: #10B981;
@@ -21,9 +24,9 @@
 
   /* Elevation Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 20px rgba(0, 168, 132, 0.35);
+  --shadow-md: 0 4px 14px -2px rgba(15, 23, 42, 0.35);
+  --shadow-lg: 0 12px 30px -4px rgba(15, 23, 42, 0.5);
+  --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.35);
 
   /* Layout Constants */
   --header-height: 64px;
@@ -39,46 +42,57 @@
 
 /* Dark Theme (Default) */
 [data-theme='dark'], :root:not([data-theme='light']) {
-  --bg-app: #0b141a;
-  --bg-card: #111b21;
-  --bg-card-hover: #202c33;
-  --bg-input: #202c33;
-  --bg-modal: #111b21;
-  --border-color: #222e35;
-  --border-color-hover: #2a3942;
-  --text-primary: #e9edef;
-  --text-secondary: #8696a0;
-  --text-muted: #667781;
-  --bubble-outgoing: #005c4b;
-  --bubble-outgoing-text: #e9edef;
-  --bubble-incoming: #202c33;
-  --bubble-incoming-text: #e9edef;
-  --bubble-border: #222e35;
-  --chat-wallpaper-bg: #0b141a;
+  --bg-app: #080B12;
+  --bg-card: #0F1623;
+  --bg-card-hover: #172033;
+  --bg-input: #141C2B;
+  --bg-modal: #0F1623;
+  --border-color: rgba(148, 163, 184, 0.14);
+  --border-color-hover: rgba(99, 102, 241, 0.38);
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --bubble-outgoing: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+  --bubble-outgoing-solid: #4F46E5;
+  --bubble-outgoing-text: #FFFFFF;
+  --bubble-incoming: #162032;
+  --bubble-incoming-text: #F1F5F9;
+  --bubble-border: rgba(148, 163, 184, 0.14);
+  --chat-wallpaper-bg: #080B12;
 }
 
 /* Light Theme */
 [data-theme='light'] {
-  --bg-app: #efeae2;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f0f2f5;
-  --bg-input: #f0f2f5;
-  --bg-modal: #ffffff;
-  --border-color: #e9edef;
-  --border-color-hover: #d1d7db;
-  --text-primary: #111b21;
-  --text-secondary: #667781;
-  --text-muted: #8696a0;
-  --bubble-outgoing: #d9fdd3;
-  --bubble-outgoing-text: #111b21;
-  --bubble-incoming: #ffffff;
-  --bubble-incoming-text: #111b21;
-  --bubble-border: #e9edef;
-  --chat-wallpaper-bg: #efeae2;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 20px rgba(0, 168, 132, 0.2);
+  --bg-app: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-input: #F1F5F9;
+  --bg-modal: #FFFFFF;
+  --border-color: #E2E8F0;
+  --border-color-hover: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --bubble-outgoing: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+  --bubble-outgoing-solid: #4F46E5;
+  --bubble-outgoing-text: #FFFFFF;
+  --bubble-incoming: #FFFFFF;
+  --bubble-incoming-text: #0F172A;
+  --bubble-border: #E2E8F0;
+  --chat-wallpaper-bg: #F1F5F9;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.1);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.22);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Universal Reset */

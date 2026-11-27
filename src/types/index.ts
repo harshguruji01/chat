@@ -1,3 +1,13 @@
+export type AccountState =
+  | 'active'
+  | 'email_verification_pending'
+  | 'restricted'
+  | 'suspended'
+  | 'deleted'
+  | 'recovery_pending';
+
+export type PrivacyAudience = 'everyone' | 'contacts' | 'nobody';
+
 export interface Profile {
   id: string;
   user_code: string; // e.g. 'HG8X29K4'
@@ -12,6 +22,13 @@ export interface Profile {
   appear_in_nearby: boolean;
   show_online_status: boolean;
   read_receipts_enabled?: boolean;
+  who_can_find?: PrivacyAudience;
+  who_can_request?: 'everyone' | 'nobody';
+  who_can_see_avatar?: PrivacyAudience;
+  who_can_call?: PrivacyAudience;
+  who_can_invite_group?: PrivacyAudience;
+  account_state?: AccountState;
+  terms_accepted_at?: string | null;
   last_seen: string;
   latitude?: number | null;
   longitude?: number | null;
@@ -23,6 +40,39 @@ export interface Profile {
   is_premium?: boolean;
   premium_plan?: 'monthly' | 'annual' | 'lifetime' | null;
   premium_until?: string | null;
+}
+
+export interface UserSessionRecord {
+  id: string;
+  user_id: string;
+  device_name: string;
+  platform: 'web' | 'android' | 'ios' | 'desktop';
+  user_agent?: string | null;
+  is_revoked: boolean;
+  last_active_at: string;
+  created_at: string;
+}
+
+export interface ConnectionRequest {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
+  message?: string | null;
+  created_at: string;
+  updated_at: string;
+  sender?: Profile;
+  receiver?: Profile;
+}
+
+export interface ContactRecord {
+  id: string;
+  user_id: string;
+  contact_id: string;
+  nickname?: string | null;
+  is_favorite: boolean;
+  created_at: string;
+  profile?: Profile;
 }
 
 export interface NearbyUser {
@@ -56,6 +106,16 @@ export interface Block {
   blocked_profile?: Profile;
 }
 
+export type GroupRole = 'owner' | 'admin' | 'moderator' | 'member';
+
+export interface GroupSettings {
+  who_can_invite: 'admins' | 'all';
+  who_can_send: 'admins' | 'all';
+  who_can_edit_info: 'admins' | 'all';
+  who_can_pin: 'admins' | 'all';
+  who_can_call: 'admins' | 'all';
+}
+
 export interface Conversation {
   id: string;
   created_at: string;
@@ -64,6 +124,11 @@ export interface Conversation {
   last_message_at?: string;
   is_group?: boolean;
   title?: string;
+  description?: string | null;
+  is_private?: boolean;
+  announcement_only?: boolean;
+  pinned_message_ids?: string[];
+  settings?: GroupSettings;
   avatar_url?: string | null;
   created_by?: string | null;
   // enriched with other member details (for 1-on-1) or member list (for group)
@@ -80,7 +145,7 @@ export interface ConversationMember {
   last_read_at: string;
   cleared_at?: string | null;
   created_at: string;
-  role?: 'admin' | 'member';
+  role?: GroupRole;
   profile?: Profile;
 }
 
@@ -176,4 +241,130 @@ export interface ChannelPost {
   created_at: string;
 }
 
-export type TabType = 'home' | 'chat' | 'communities' | 'channels' | 'search' | 'profile';
+export type CallLifecycleState =
+  | 'idle'
+  | 'initiating'
+  | 'ringing'
+  | 'accepted'
+  | 'connecting'
+  | 'connected'
+  | 'reconnecting'
+  | 'declined'
+  | 'busy'
+  | 'missed'
+  | 'cancelled'
+  | 'ended'
+  | 'failed';
+
+export type VideoQualityMode = 'data_saver' | 'standard' | 'high';
+
+export interface CallRecord {
+  id: string;
+  conversation_id?: string | null;
+  caller_id: string;
+  callee_id: string;
+  call_type: 'audio' | 'video';
+  state: CallLifecycleState;
+  room_id: string;
+  started_at: string;
+  connected_at?: string | null;
+  ended_at?: string | null;
+  duration_seconds: number;
+  end_reason?: string | null;
+  caller_profile?: Profile;
+  callee_profile?: Profile;
+}
+
+export type MeetingType =
+  | 'audio'
+  | 'video'
+  | 'group_discussion'
+  | 'team_meeting'
+  | 'study_meeting'
+  | 'presentation';
+
+export interface ConferenceRoom {
+  id: string;
+  room_code: string;
+  title: string;
+  description?: string | null;
+  meeting_type: MeetingType;
+  host_id: string;
+  scheduled_at: string;
+  duration_minutes: number;
+  max_participants: number;
+  is_locked: boolean;
+  status: 'scheduled' | 'active' | 'ended';
+  created_at: string;
+  ended_at?: string | null;
+  host_profile?: Profile;
+  members?: ConferenceMember[];
+}
+
+export interface ConferenceMember {
+  id: string;
+  conference_id: string;
+  user_id: string;
+  role: 'host' | 'co_host' | 'participant';
+  invite_status: 'invited' | 'accepted' | 'declined' | 'joined' | 'left' | 'removed';
+  is_muted_by_host: boolean;
+  hand_raised: boolean;
+  breakout_room_id?: string | null;
+  joined_at?: string | null;
+  profile?: Profile;
+}
+
+export interface BreakoutRoom {
+  id: string;
+  conference_id: string;
+  name: string;
+  is_closed: boolean;
+  created_at: string;
+}
+
+export type AppNotificationType =
+  | 'message'
+  | 'group_message'
+  | 'connection_request'
+  | 'incoming_call'
+  | 'missed_call'
+  | 'conference_invite'
+  | 'security'
+  | 'announcement';
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  type: AppNotificationType;
+  title: string;
+  body: string;
+  data: Record<string, unknown>;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationPreferences {
+  user_id: string;
+  messages_enabled: boolean;
+  groups_enabled: boolean;
+  calls_enabled: boolean;
+  sound_enabled: boolean;
+  vibration_enabled: boolean;
+  quiet_hours_start?: string | null;
+  quiet_hours_end?: string | null;
+  preview_visible: boolean;
+  muted_conversations: string[];
+}
+
+export type TabType =
+  | 'home'
+  | 'chat'
+  | 'contacts'
+  | 'groups'
+  | 'calls'
+  | 'conferences'
+  | 'notifications'
+  | 'communities'
+  | 'channels'
+  | 'search'
+  | 'profile';

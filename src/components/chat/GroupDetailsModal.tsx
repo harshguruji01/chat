@@ -25,8 +25,10 @@ export const GroupDetailsModal: React.FC<GroupDetailsModalProps> = ({
   onLeaveSuccess,
 }) => {
   const { user } = useAuth();
-  const { updateGroupInfo, addGroupMembers, leaveGroup } = useChat();
+  const { updateGroupInfo, addGroupMembers, leaveGroup, updateGroupMemberRole, removeGroupMember, updateGroupSettings } = useChat();
   const { showToast } = useToast();
+
+  const [announcementOnly, setAnnouncementOnly] = useState(Boolean(conversation.announcement_only));
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [newTitle, setNewTitle] = useState(conversation.title || '');
@@ -515,14 +517,99 @@ export const GroupDetailsModal: React.FC<GroupDetailsModalProps> = ({
                           gap: '3px',
                         }}
                       >
-                        <Shield size={10} /> Admin
+                        <Shield size={10} /> {m.role === 'owner' ? 'Owner' : m.role === 'moderator' ? 'Mod' : 'Admin'}
                       </span>
+                    )}
+                    {isAdmin && !isSelf && p.id !== conversation.created_by && (
+                      <>
+                        <select
+                          value={m.role || 'member'}
+                          onChange={async (e) => {
+                            const res = await updateGroupMemberRole(conversation.id, p.id, e.target.value as any);
+                            if (res.error) showToast(res.error, 'error');
+                            else showToast('Role updated', 'success');
+                          }}
+                          style={{
+                            fontSize: '0.72rem',
+                            padding: '2px 6px',
+                            borderRadius: '6px',
+                            background: 'var(--bg-input)',
+                            border: '1px solid var(--border-color)',
+                          }}
+                        >
+                          <option value="member">Member</option>
+                          <option value="moderator">Moderator</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                        <button
+                          onClick={async () => {
+                            const res = await removeGroupMember(conversation.id, p.id);
+                            if (res.error) showToast(res.error, 'error');
+                            else showToast('Member removed', 'info');
+                          }}
+                          title="Remove Member"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-danger)',
+                            cursor: 'pointer',
+                            padding: '2px',
+                          }}
+                        >
+                          <X size={14} />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
               );
             })}
           </div>
+
+          {/* Announcement-Only Mode Toggle for Admins */}
+          {isAdmin && (
+            <div
+              style={{
+                padding: '10px 14px',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border-color)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 600, fontSize: '0.86rem' }}>Announcement-Only Mode</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Only group owners &amp; admins can post messages.
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={announcementOnly}
+                onChange={async (e) => {
+                  const next = e.target.checked;
+                  setAnnouncementOnly(next);
+                  const baseSettings = conversation.settings || {
+                    who_can_invite: 'admins',
+                    who_can_send: next ? 'admins' : 'all',
+                    who_can_edit_info: 'admins',
+                    who_can_pin: 'admins',
+                    who_can_call: 'all',
+                  };
+                  await updateGroupSettings(
+                    conversation.id,
+                    { ...baseSettings, who_can_send: next ? 'admins' : 'all' },
+                    next
+                  );
+                  showToast(next ? 'Announcement mode enabled' : 'All members can message', 'info');
+                }}
+                style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+              />
+            </div>
+          )}
 
           {/* Leave Group Action */}
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between' }}>

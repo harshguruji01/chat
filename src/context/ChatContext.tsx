@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-import type { Conversation, Message, MessageType, Profile } from '../types';
+import type { Conversation, Message, MessageType, Profile, GroupRole, GroupSettings } from '../types';
 import { triggerHaptics } from '../lib/utils';
 import { compressImage, compressAvatar } from '../lib/compression';
 import { soundEffects } from '../lib/soundEffects';
@@ -46,6 +46,11 @@ interface ChatContextType {
   isUserBlocked: (targetUserId: string) => boolean;
   blockedUserIds: string[];
   requestNotificationPermission: () => Promise<boolean>;
+  pinMessage: (convId: string, messageId: string) => Promise<{ error?: string }>;
+  unpinMessage: (convId: string, messageId: string) => Promise<{ error?: string }>;
+  updateGroupMemberRole: (convId: string, targetUserId: string, role: GroupRole) => Promise<{ error?: string }>;
+  removeGroupMember: (convId: string, targetUserId: string) => Promise<{ error?: string }>;
+  updateGroupSettings: (convId: string, settings: GroupSettings, announcementOnly: boolean) => Promise<{ error?: string }>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -1395,6 +1400,59 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return blockedUserIds.includes(targetUserId);
   };
 
+  const pinMessage = async (convId: string, messageId: string) => {
+    const conv = conversations.find((c) => c.id === convId) || activeConversation;
+    const current = conv?.pinned_message_ids || [];
+    if (current.includes(messageId)) return {};
+    const updated = [...current, messageId].slice(-5);
+    const { error } = await supabase
+      .from('conversations')
+      .update({ pinned_message_ids: updated })
+      .eq('id', convId);
+    if (!error) await fetchConversations();
+    return error ? { error: error.message } : {};
+  };
+
+  const unpinMessage = async (convId: string, messageId: string) => {
+    const conv = conversations.find((c) => c.id === convId) || activeConversation;
+    const updated = (conv?.pinned_message_ids || []).filter((id) => id !== messageId);
+    const { error } = await supabase
+      .from('conversations')
+      .update({ pinned_message_ids: updated })
+      .eq('id', convId);
+    if (!error) await fetchConversations();
+    return error ? { error: error.message } : {};
+  };
+
+  const updateGroupMemberRole = async (convId: string, targetUserId: string, role: GroupRole) => {
+    const { error } = await supabase
+      .from('conversation_members')
+      .update({ role })
+      .eq('conversation_id', convId)
+      .eq('user_id', targetUserId);
+    if (!error) await fetchConversations();
+    return error ? { error: error.message } : {};
+  };
+
+  const removeGroupMember = async (convId: string, targetUserId: string) => {
+    const { error } = await supabase
+      .from('conversation_members')
+      .delete()
+      .eq('conversation_id', convId)
+      .eq('user_id', targetUserId);
+    if (!error) await fetchConversations();
+    return error ? { error: error.message } : {};
+  };
+
+  const updateGroupSettings = async (convId: string, settings: GroupSettings, announcementOnly: boolean) => {
+    const { error } = await supabase
+      .from('conversations')
+      .update({ settings, announcement_only: announcementOnly })
+      .eq('id', convId);
+    if (!error) await fetchConversations();
+    return error ? { error: error.message } : {};
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -1428,6 +1486,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isUserBlocked,
         blockedUserIds,
         requestNotificationPermission,
+        pinMessage,
+        unpinMessage,
+        updateGroupMemberRole,
+        removeGroupMember,
+        updateGroupSettings,
       }}
     >
       {children}

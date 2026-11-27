@@ -14,6 +14,10 @@ import { UserSearch } from '../search/UserSearch';
 import { ProfileView } from '../profile/ProfileView';
 import { CommunitiesView } from '../community/CommunitiesView';
 import { ChannelsView } from '../channel/ChannelsView';
+import { ContactsView } from '../contacts/ContactsView';
+import { CallsView } from '../call/CallsView';
+import { ConferencesView } from '../conference/ConferencesView';
+import { NotificationsView } from '../notifications/NotificationsView';
 import { LocationPermissionModal } from '../auth/LocationPermissionModal';
 import { SettingsModal } from '../settings/SettingsModal';
 import { PublicProfileModal } from '../profile/PublicProfileModal';
@@ -192,7 +196,40 @@ export const MainLayout: React.FC = () => {
             </div>
           )}
 
-          {/* 3. Communities Tab */}
+          {/* 3. Contacts Tab */}
+          {activeTab === 'contacts' && (
+            <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+              <ContactsView
+                onStartChat={handleStartChatFromOtherTab}
+                onViewProfile={handleViewProfile}
+              />
+            </div>
+          )}
+
+          {/* 4. Calls Tab */}
+          {activeTab === 'calls' && (
+            <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+              <CallsView />
+            </div>
+          )}
+
+          {/* 5. Conferences Tab */}
+          {activeTab === 'conferences' && (
+            <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+              <ConferencesView />
+            </div>
+          )}
+
+          {/* 6. Notifications Tab */}
+          {activeTab === 'notifications' && (
+            <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
+              <NotificationsView
+                onNavigateTab={(tab) => setActiveTab(tab)}
+              />
+            </div>
+          )}
+
+          {/* 7. Communities Tab */}
           {activeTab === 'communities' && (
             <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
               <CommunitiesView />

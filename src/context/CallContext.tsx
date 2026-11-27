@@ -2,15 +2,25 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { useChat } from './ChatContext';
-import type { Profile } from '../types';
+import type { Profile, CallLifecycleState, VideoQualityMode } from '../types';
 import { soundEffects } from '../lib/soundEffects';
 import { triggerHaptics } from '../lib/utils';
+import { getIceServers } from '../config/environment';
+import {
+  verifyCallEligibility,
+  createCallRecord,
+  updateCallRecordState,
+  getVideoConstraints,
+} from '../services/callService';
 
 export type CallState = 'idle' | 'outgoing' | 'incoming' | 'connected' | 'ended';
 export type CallType = 'video' | 'audio';
 
 interface CallContextType {
   callState: CallState;
+  lifecycleState: CallLifecycleState;
+  videoQuality: VideoQualityMode;
+  setVideoQuality: (q: VideoQualityMode) => void;
   callType: CallType;
   partnerProfile: Profile | null;
   localStream: MediaStream | null;
@@ -33,18 +43,16 @@ interface CallContextType {
 const CallContext = createContext<CallContextType | undefined>(undefined);
 
 const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-  ],
+  iceServers: getIceServers(),
 };
 
 export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
-  const { sendMessage } = useChat();
+  const { sendMessage, isUserBlocked } = useChat();
 
   const [callState, setCallState] = useState<CallState>('idle');
+  const [lifecycleState, setLifecycleState] = useState<CallLifecycleState>('idle');
+  const [videoQuality, setVideoQuality] = useState<VideoQualityMode>('standard');
   const [callType, setCallType] = useState<CallType>('video');
   const [partnerProfile, setPartnerProfile] = useState<Profile | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -115,6 +123,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const partnerId = targetUserIdRef.current;
 
     if (callId && partnerId && user) {
+      updateCallRecordState(callId, 'ended', duration, reason).catch(() => {});
       try {
         const payload = { callId, fromId: user.id, reason };
         supabase.channel(`guruchat-call-${partnerId}`).send({ type: 'broadcast', event: 'call_end', payload }).catch(() => {});
@@ -127,6 +136,7 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     soundEffects.play('call_end');
     cleanupMediaAndTracks();
     setCallState('ended');
+    setLifecycleState('ended');
 
     // Post call recap into chat if conversationId is known
     if (conversationIdRef.current && duration > 0) {
@@ -307,7 +317,20 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     cleanupMediaAndTracks();
 
-    const callId = `call_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    if (!user) return;
+    const eligibility = await verifyCallEligibility(profile, targetUser.id, isUserBlocked(targetUser.id));
+    if (!eligibility.eligible) {
+      throw new Error(eligibility.reason || 'Call not permitted');
+    }
+
+    const roomId = `gc_room_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const callId = await createCallRecord({
+      callerId: user.id,
+      calleeId: targetUser.id,
+      callType: type,
+      roomId,
+      conversationId,
+    });
     activeCallIdRef.current = callId;
     targetUserIdRef.current = targetUser.id;
     conversationIdRef.current = conversationId || null;
@@ -315,21 +338,22 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPartnerProfile(targetUser);
     setCallType(type);
     setCallState('outgoing');
+    setLifecycleState('ringing');
     setIsMuted(false);
     setIsVideoOff(type === 'audio');
     soundEffects.startDialing();
 
-    // Acquire local camera and mic
+    // Acquire local camera and mic with Echo Cancellation & Noise Suppression
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: type === 'video' ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } : false,
-        audio: true,
+        video: type === 'video' ? { facingMode: 'user', ...getVideoConstraints(videoQuality) } : false,
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       setLocalStream(stream);
       localStreamRef.current = stream;
       setupPeerConnection(targetUser.id);
     } catch (mediaErr) {
-      console.warn('getUserMedia error, falling back to simulated stream:', mediaErr);
+      console.warn('getUserMedia error:', mediaErr);
     }
 
     // Broadcast call invitation to target user
@@ -473,6 +497,9 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <CallContext.Provider
       value={{
         callState,
+        lifecycleState,
+        videoQuality,
+        setVideoQuality,
         callType,
         partnerProfile,
         localStream,

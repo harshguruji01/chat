@@ -22,6 +22,11 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
   const [appearNearby, setAppearNearby] = useState(profile?.appear_in_nearby ?? true);
   const [showOnline, setShowOnline] = useState(profile?.show_online_status ?? true);
   const [isPrivate, setIsPrivate] = useState(profile?.is_private ?? false);
+  const [whoCanFind, setWhoCanFind] = useState<'everyone' | 'contacts' | 'nobody'>(profile?.who_can_find ?? 'everyone');
+  const [whoCanRequest, setWhoCanRequest] = useState<'everyone' | 'nobody'>(profile?.who_can_request ?? 'everyone');
+  const [whoCanSeeAvatar, setWhoCanSeeAvatar] = useState<'everyone' | 'contacts' | 'nobody'>(profile?.who_can_see_avatar ?? 'everyone');
+  const [whoCanCall, setWhoCanCall] = useState<'everyone' | 'contacts' | 'nobody'>(profile?.who_can_call ?? 'contacts');
+  const [whoCanInviteGroup, setWhoCanInviteGroup] = useState<'everyone' | 'contacts' | 'nobody'>(profile?.who_can_invite_group ?? 'contacts');
   const [blockedProfiles, setBlockedProfiles] = useState<Profile[]>([]);
   const [isLoadingBlocks, setIsLoadingBlocks] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -48,6 +53,11 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
       appear_in_nearby: appearNearby,
       show_online_status: showOnline,
       is_private: isPrivate,
+      who_can_find: whoCanFind,
+      who_can_request: whoCanRequest,
+      who_can_see_avatar: whoCanSeeAvatar,
+      who_can_call: whoCanCall,
+      who_can_invite_group: whoCanInviteGroup,
     });
     setIsSaving(false);
 
@@ -159,6 +169,98 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
               onChange={(e) => setIsPrivate(e.target.checked)}
               style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
             />
+          </div>
+
+          {/* Granular Audience Controls (Prompt 06) */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '10px',
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            <div>
+              <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Who can find my username
+              </label>
+              <select
+                value={whoCanFind}
+                onChange={(e) => setWhoCanFind(e.target.value as any)}
+                className="input-field"
+                style={{ padding: '6px 8px', fontSize: '0.82rem' }}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Who can send requests
+              </label>
+              <select
+                value={whoCanRequest}
+                onChange={(e) => setWhoCanRequest(e.target.value as any)}
+                className="input-field"
+                style={{ padding: '6px 8px', fontSize: '0.82rem' }}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Who can see profile photo
+              </label>
+              <select
+                value={whoCanSeeAvatar}
+                onChange={(e) => setWhoCanSeeAvatar(e.target.value as any)}
+                className="input-field"
+                style={{ padding: '6px 8px', fontSize: '0.82rem' }}
+              >
+                <option value="everyone">Everyone</option>
+                <option value="contacts">Contacts Only</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Who can call me
+              </label>
+              <select
+                value={whoCanCall}
+                onChange={(e) => setWhoCanCall(e.target.value as any)}
+                className="input-field"
+                style={{ padding: '6px 8px', fontSize: '0.82rem' }}
+              >
+                <option value="contacts">Contacts Only (Recommended)</option>
+                <option value="everyone">Everyone</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                Who can invite me to groups
+              </label>
+              <select
+                value={whoCanInviteGroup}
+                onChange={(e) => setWhoCanInviteGroup(e.target.value as any)}
+                className="input-field"
+                style={{ padding: '6px 8px', fontSize: '0.82rem' }}
+              >
+                <option value="contacts">Contacts Only (Recommended)</option>
+                <option value="everyone">Everyone</option>
+                <option value="nobody">Nobody</option>
+              </select>
+            </div>
           </div>
         </div>
 
