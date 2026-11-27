@@ -31,7 +31,8 @@ export const PublicLandingScreen: React.FC<PublicLandingScreenProps> = ({
   return (
     <div
       style={{
-        minHeight: '100vh',
+        height: '100%',
+        width: '100%',
         background: 'var(--bg-app)',
         backgroundImage:
           'radial-gradient(ellipse at 15% 10%, rgba(59, 130, 246, 0.16) 0%, transparent 45%), radial-gradient(ellipse at 85% 90%, rgba(6, 182, 212, 0.14) 0%, transparent 45%)',

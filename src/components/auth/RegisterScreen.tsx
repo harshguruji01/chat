@@ -128,10 +128,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
     <div
       style={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '32px 20px',
+        height: '100%',
+        width: '100%',
+        padding: '24px 16px 48px',
         backgroundColor: 'var(--bg-app)',
         backgroundImage: 'radial-gradient(ellipse at top, rgba(99, 102, 241, 0.12) 0%, transparent 70%)',
         overflowY: 'auto',
@@ -142,6 +143,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) =
         style={{
           width: '100%',
           maxWidth: '960px',
+          margin: 'auto',
           boxShadow: 'var(--shadow-lg)',
           display: 'flex',
           flexDirection: 'row',

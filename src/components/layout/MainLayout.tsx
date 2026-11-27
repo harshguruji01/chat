@@ -128,7 +128,7 @@ export const MainLayout: React.FC = () => {
   const isInsideActiveChat = activeTab === 'chat' && Boolean(activeConversation);
 
   return (
-    <div className="app-layout" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <div className="app-layout" style={{ display: 'flex', height: '100dvh', width: '100vw', overflow: 'hidden' }}>
       {/* Desktop Navigation Sidebar */}
       {isDesktop && (
         <Sidebar
@@ -152,7 +152,7 @@ export const MainLayout: React.FC = () => {
         }}
       >
         {/* Workspace Body */}
-        <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex' }}>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex' }}>
           {/* 1. Home Tab */}
           {activeTab === 'home' && (
             <div style={{ flex: 1, height: '100%', overflow: 'hidden' }}>
